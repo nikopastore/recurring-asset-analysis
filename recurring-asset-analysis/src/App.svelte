@@ -80,10 +80,6 @@
 	}
   </style>
   
-  <head>
-	<link rel="icon" href="/graph-favicon.png" type="image/png" />
-  </head>
-  
   <div class="app-container">
 	<div class="header">
 	  <h1>Recurring Asset Analysis</h1>
