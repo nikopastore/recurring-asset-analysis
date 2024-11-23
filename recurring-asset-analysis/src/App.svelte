@@ -1,15 +1,21 @@
 <script>
-	// Placeholder data for dropdown and time range
 	let assets = ["Gold", "SPY", "Bitcoin"];
 	let selectedAsset = "Gold";
   
-	// Time range values (1 month to 20 years in months)
-	let timeRange = 12; // Default to 1 year
-	let maxTimeRange = 240; // 20 years
+	// Define time frames and selected time frame
+	const timeFrames = [
+	  { label: "Past Month", months: 1 },
+	  { label: "Past 6 Months", months: 6 },
+	  { label: "Past 1 Year", months: 12 },
+	  { label: "Past 5 Years", months: 60 },
+	  { label: "Past 10 Years", months: 120 },
+	  { label: "Past 25 Years", months: 300 },
+	];
+  
+	let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
   </script>
   
   <style>
-	/* Basic styling for layout */
 	.app-container {
 	  font-family: Arial, sans-serif;
 	  margin: 20px;
@@ -23,7 +29,42 @@
 	.filters {
 	  display: flex;
 	  justify-content: space-between;
+	  align-items: center;
 	  margin-bottom: 20px;
+	}
+  
+	.filter-group {
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;
+	}
+  
+	.time-buttons {
+	  display: flex;
+	  gap: 10px;
+	  flex-wrap: wrap;
+	  justify-content: center;
+	}
+  
+	.time-buttons button {
+	  padding: 5px 10px;
+	  font-size: 0.9em;
+	  border: 1px solid #ccc;
+	  background: #f5f5f5;
+	  cursor: pointer;
+	  border-radius: 4px;
+	  transition: background 0.2s, color 0.2s;
+	}
+  
+	.time-buttons button:hover {
+	  background: #007acc;
+	  color: #fff;
+	}
+  
+	.time-buttons button.active {
+	  background: #007acc;
+	  color: #fff;
+	  font-weight: bold;
 	}
   
 	.chart-placeholder {
@@ -36,9 +77,13 @@
 	}
   
 	label {
-	  margin-right: 10px;
+	  margin-bottom: 5px;
 	}
   </style>
+  
+  <head>
+	<link rel="icon" href="/graph-favicon.png" type="image/png" />
+  </head>
   
   <div class="app-container">
 	<div class="header">
@@ -48,7 +93,7 @@
   
 	<div class="filters">
 	  <!-- Asset Dropdown -->
-	  <div>
+	  <div class="filter-group">
 		<label for="asset-select">Select Asset:</label>
 		<select id="asset-select" bind:value={selectedAsset}>
 		  {#each assets as asset}
@@ -56,25 +101,26 @@
 		  {/each}
 		</select>
 	  </div>
+	</div>
   
-	  <!-- Time Range Slider -->
-	  <div>
-		<label for="time-range">Time Range:</label>
-		<input
-		  id="time-range"
-		  type="range"
-		  min="1"
-		  max={maxTimeRange}
-		  step="1"
-		  bind:value={timeRange}
-		/>
-		<span>{timeRange} months</span>
+	<!-- Time Filter Buttons -->
+	<div class="filter-group">
+	  <label>Time Frame:</label>
+	  <div class="time-buttons">
+		{#each timeFrames as timeFrame (timeFrame.label)}
+		  <button
+			on:click={() => (selectedTimeFrame = timeFrame)}
+			class:selected={selectedTimeFrame === timeFrame}
+		  >
+			{timeFrame.label}
+		  </button>
+		{/each}
 	  </div>
 	</div>
   
 	<!-- Placeholder for Line Chart -->
 	<div class="chart-placeholder">
-	  <p>Line Chart Placeholder</p>
+	  <p>Line Chart Placeholder for {selectedTimeFrame.label}</p>
 	</div>
   </div>
   
