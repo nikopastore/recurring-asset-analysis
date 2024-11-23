@@ -2,7 +2,6 @@
 	let assets = ["Gold", "SPY", "Bitcoin"];
 	let selectedAsset = "Gold";
   
-	// Define time frames and selected time frame
 	const timeFrames = [
 	  { label: "Past Month", months: 1 },
 	  { label: "Past 6 Months", months: 6 },
@@ -105,8 +104,8 @@
   
 	<!-- Time Filter Buttons -->
 	<div class="filter-group">
-	  <label>Time Frame:</label>
-	  <div class="time-buttons">
+	  <label for="time-frame-select">Time Frame:</label>
+	  <div class="time-buttons" id="time-frame-select">
 		{#each timeFrames as timeFrame (timeFrame.label)}
 		  <button
 			on:click={() => (selectedTimeFrame = timeFrame)}
