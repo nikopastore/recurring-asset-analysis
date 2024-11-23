@@ -1,30 +1,80 @@
 <script>
-	export let name;
-</script>
-
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
-
-<style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
+	// Placeholder data for dropdown and time range
+	let assets = ["Gold", "SPY", "Bitcoin"];
+	let selectedAsset = "Gold";
+  
+	// Time range values (1 month to 20 years in months)
+	let timeRange = 12; // Default to 1 year
+	let maxTimeRange = 240; // 20 years
+  </script>
+  
+  <style>
+	/* Basic styling for layout */
+	.app-container {
+	  font-family: Arial, sans-serif;
+	  margin: 20px;
 	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
+  
+	.header {
+	  text-align: center;
+	  margin-bottom: 20px;
 	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
+  
+	.filters {
+	  display: flex;
+	  justify-content: space-between;
+	  margin-bottom: 20px;
 	}
-</style>
+  
+	.chart-placeholder {
+	  border: 2px dashed #ccc;
+	  height: 400px;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  color: #888;
+	}
+  
+	label {
+	  margin-right: 10px;
+	}
+  </style>
+  
+  <div class="app-container">
+	<div class="header">
+	  <h1>Recurring Asset Analysis</h1>
+	  <p>Analyze the impact of recurring weekly investments.</p>
+	</div>
+  
+	<div class="filters">
+	  <!-- Asset Dropdown -->
+	  <div>
+		<label for="asset-select">Select Asset:</label>
+		<select id="asset-select" bind:value={selectedAsset}>
+		  {#each assets as asset}
+			<option value={asset}>{asset}</option>
+		  {/each}
+		</select>
+	  </div>
+  
+	  <!-- Time Range Slider -->
+	  <div>
+		<label for="time-range">Time Range:</label>
+		<input
+		  id="time-range"
+		  type="range"
+		  min="1"
+		  max={maxTimeRange}
+		  step="1"
+		  bind:value={timeRange}
+		/>
+		<span>{timeRange} months</span>
+	  </div>
+	</div>
+  
+	<!-- Placeholder for Line Chart -->
+	<div class="chart-placeholder">
+	  <p>Line Chart Placeholder</p>
+	</div>
+  </div>
+  
