@@ -22,14 +22,14 @@ export default {
       },
       emitCss: true,
     }),
-    css({ output: 'bundle.css' }), // CSS plugin
+    css({ output: 'bundle.css' }),
     resolve({
       browser: true,
       dedupe: ['svelte'],
     }),
     commonjs(),
     !production && livereload('public'),
-    production && terser(), // Terser for minification in production
+    production && terser(),
   ],
   watch: {
     clearScreen: false,
