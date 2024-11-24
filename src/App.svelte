@@ -11,7 +11,7 @@
 	  { label: "Past 25 Years", months: 300 },
 	];
   
-	let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
+	let selectedTimeFrame = timeFrames[2];
   </script>
   
   <style>
@@ -87,7 +87,6 @@
 	</div>
   
 	<div class="filters">
-	  <!-- Asset Dropdown -->
 	  <div class="filter-group">
 		<label for="asset-select">Select Asset:</label>
 		<select id="asset-select" bind:value={selectedAsset}>
@@ -98,7 +97,6 @@
 	  </div>
 	</div>
   
-	<!-- Time Filter Buttons -->
 	<div class="filter-group">
 	  <label for="time-frame-select">Time Frame:</label>
 	  <div class="time-buttons" id="time-frame-select">
@@ -113,7 +111,6 @@
 	  </div>
 	</div>
   
-	<!-- Placeholder for Line Chart -->
 	<div class="chart-placeholder">
 	  <p>Line Chart Placeholder for {selectedTimeFrame.label}</p>
 	</div>
