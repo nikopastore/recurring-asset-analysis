@@ -1,4 +1,3 @@
-import serve from 'rollup-plugin-serve';
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
@@ -30,13 +29,8 @@ export default {
     }),
     commonjs(),
     !production &&
-      serve({
-        contentBase: 'public',
-        port: 5000, // You can change the port if needed
-        open: true, // Automatically opens the browser
-      }),
-    !production && livereload('public'),
-    production && terser(),
+      livereload('public'), // Reload changes for development
+    production && terser(), // Minify for production
   ],
   watch: {
     clearScreen: false,
