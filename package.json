@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-"scripts": {
-  "dev": "rollup -c -w",
-  "dev:open": "npm run dev & start http://localhost:35731",
-  "build": "rollup -c",
-  "deploy": "npm run build && gh-pages -d public"
-},
+  "scripts": {
+    "dev": "rollup -c -w",
+    "dev:open": "npm run dev & start http://localhost:35731",
+    "build": "rollup -c",
+    "deploy": "npm run build && gh-pages -d public"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
@@ -20,5 +20,8 @@
     "rollup-plugin-serve": "^1.1.1",
     "rollup-plugin-svelte": "^7.1.2",
     "svelte": "^3.55.0"
+  },
+  "dependencies": {
+    "d3": "^7.9.0"
   }
 }
