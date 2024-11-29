@@ -10,7 +10,7 @@ df_melted = pd.melt(
     id_vars=["Date"],
     value_vars=["Close", "Close.1", "Close.2"],
     var_name="AssetColumn",
-    value_name="Close"
+    value_name="TempClose"  # Temporary name to avoid conflicts
 )
 
 # Map asset names to the melted columns
@@ -22,10 +22,13 @@ asset_mapping = {
 df_melted["Asset"] = df_melted["AssetColumn"].map(asset_mapping)
 
 # Drop rows with no closing price
-df_melted = df_melted.dropna(subset=["Close"])
+df_melted = df_melted.dropna(subset=["TempClose"])
 
-# Convert the Close column to numeric
-df_melted["Close"] = pd.to_numeric(df_melted["Close"], errors="coerce")
+# Convert the TempClose column to numeric
+df_melted["TempClose"] = pd.to_numeric(df_melted["TempClose"], errors="coerce")
+
+# Rename TempClose back to Close
+df_melted = df_melted.rename(columns={"TempClose": "Close"})
 
 # Keep only relevant columns
 df_melted = df_melted[["Asset", "Date", "Close"]]
