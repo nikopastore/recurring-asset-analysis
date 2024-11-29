@@ -5,9 +5,7 @@
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
-    // Logging the selected asset for debugging
-    $: console.log("Selected Asset:", selectedAsset);
-
+    // Define time frames
     const timeFrames = [
         { label: "Past Month", months: 1 },
         { label: "Past 6 Months", months: 6 },
@@ -18,26 +16,26 @@
     ];
     let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
 
+    // Asset descriptions
     const assetDescriptions = {
         Gold: "Gold is a precious metal often considered a hedge against inflation.",
         SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
         Bitcoin: "Bitcoin is a decentralized digital currency created in 2009.",
     };
 
-    // Data fetching and filtering
+    // Data storage
     let assetData = [];
     let filteredData = [];
     let loading = true;
     let errorMessage = "";
 
+    // Fetch data on mount
     onMount(async () => {
         try {
             const response = await fetch("/normalized_prices.json");
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
             console.log("Data loaded:", assetData);
-
-            // Filter the data for the initial selection
             updateFilteredData();
         } catch (error) {
             errorMessage = `Error loading data: ${error.message}`;
@@ -47,16 +45,30 @@
         }
     });
 
-    // Update filtered data when the asset or time frame changes
+    // Update filtered data based on selected asset and time frame
     $: updateFilteredData();
     function updateFilteredData() {
+        if (!assetData || assetData.length === 0) {
+            filteredData = [];
+            return;
+        }
+
         const today = new Date();
         const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
+
         filteredData = assetData.filter(
             (record) =>
                 record.Asset === selectedAsset &&
                 new Date(record.Date) >= cutoffDate
         );
+    }
+
+    function handleAssetChange(event) {
+        selectedAsset = event.target.value;
+    }
+
+    function handleTimeFrameChange(timeFrame) {
+        selectedTimeFrame = timeFrame;
     }
 </script>
 
@@ -75,14 +87,41 @@
 
     .filter-container {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
         margin: 20px auto;
-        max-width: 800px;
     }
 
-    select {
+    select, button {
         padding: 8px;
         font-size: 16px;
+        cursor: pointer;
+    }
+
+    .time-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .time-buttons button {
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        border-radius: 4px;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .time-buttons button:hover {
+        background: #007acc;
+        color: white;
+    }
+
+    .time-buttons button.active {
+        background: #007acc;
+        color: white;
+        font-weight: bold;
     }
 
     .description {
@@ -103,8 +142,8 @@
     }
 
     .data-list ul {
-        list-style: none;
         padding: 0;
+        list-style: none;
     }
 
     .data-list li {
@@ -121,34 +160,6 @@
         text-align: center;
         margin: 20px;
     }
-
-    .time-buttons {
-        display: flex;
-        justify-content: center;
-        margin: 10px 0;
-        gap: 10px;
-    }
-
-    .time-buttons button {
-        padding: 8px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        background: #f5f5f5;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: background 0.2s, color 0.2s;
-    }
-
-    .time-buttons button:hover {
-        background: #007acc;
-        color: white;
-    }
-
-    .time-buttons button.active {
-        background: #007acc;
-        color: white;
-        font-weight: bold;
-    }
 </style>
 
 <!-- HTML Structure -->
@@ -156,22 +167,24 @@
     <!-- Page Title -->
     <h1>Recurring Asset Analysis</h1>
 
-    <!-- Asset Selector -->
+    <!-- Filters -->
     <div class="filter-container">
+        <!-- Asset Dropdown -->
         <div>
             <label for="asset-select">Select Asset:</label>
-            <select id="asset-select" bind:value={selectedAsset}>
+            <select id="asset-select" on:change={handleAssetChange}>
                 {#each assets as asset}
                     <option value={asset}>{asset}</option>
                 {/each}
             </select>
         </div>
 
+        <!-- Time Frame Buttons -->
         <div class="time-buttons">
             {#each timeFrames as timeFrame (timeFrame.label)}
                 <button
                     class:selected={selectedTimeFrame === timeFrame}
-                    on:click={() => (selectedTimeFrame = timeFrame)}
+                    on:click={() => handleTimeFrameChange(timeFrame)}
                 >
                     {timeFrame.label}
                 </button>
