@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import Chart from "./Chart.svelte"; // Import the new chart component
+    import Chart from "./chart.svelte"; // Import the new chart component
 
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
@@ -101,5 +101,5 @@
         <p class="error">{errorMessage}</p>
     {/if}
 
-    <Chart {data}={filteredData} {investmentAmount} />
+    <Chart {filteredData} {investmentAmount} />
 </div>

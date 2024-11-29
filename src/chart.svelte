@@ -10,7 +10,10 @@
     $: drawChart();
 
     function drawChart() {
-        if (!data || data.length === 0) return;
+        if (!data || data.length === 0) {
+            console.log("No data to display");
+            return;
+        }
 
         const margin = { top: 20, right: 30, bottom: 50, left: 50 };
         const width = 800 - margin.left - margin.right;
@@ -28,25 +31,36 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
+        // Parse the dates
+        const parseDate = d3.timeParse("%Y-%m-%d");
+        const formattedData = data.map(d => ({
+            ...d,
+            Date: parseDate(d.Date),
+            InvestmentValue: d.Close * investmentAmount
+        }));
+
         // Create scales
         const x = d3
             .scaleTime()
-            .domain(d3.extent(data, (d) => new Date(d.Date)))
+            .domain(d3.extent(formattedData, d => d.Date))
             .range([0, width]);
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(data, (d) => d.Close * investmentAmount)])
+            .domain([0, d3.max(formattedData, d => d.InvestmentValue)])
             .nice()
             .range([height, 0]);
 
         // Add axes
-        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d")));
+
         svg.append("g").call(d3.axisLeft(y));
 
         // Add line
         svg.append("path")
-            .datum(data)
+            .datum(formattedData)
             .attr("fill", "none")
             .attr("stroke", "steelblue")
             .attr("stroke-width", 2)
@@ -54,11 +68,11 @@
                 "d",
                 d3
                     .line()
-                    .x((d) => x(new Date(d.Date)))
-                    .y((d) => y(d.Close * investmentAmount))
+                    .x(d => x(d.Date))
+                    .y(d => y(d.InvestmentValue))
             );
 
-        // Add axes labels
+        // Add labels
         svg
             .append("text")
             .attr("x", width / 2)
