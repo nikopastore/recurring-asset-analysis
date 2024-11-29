@@ -11,13 +11,36 @@
 	  { label: "Past 25 Years", months: 300 },
 	];
   
-	let selectedTimeFrame = timeFrames[2];
+	let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
+	let theme = "light"; // Default theme
+  
+	const toggleTheme = () => {
+	  theme = theme === "light" ? "dark" : "light";
+	};
+  
+	// Asset descriptions
+	const assetDescriptions = {
+	  Gold: "A precious metal often seen as a hedge against inflation.",
+	  SPY: "An ETF tracking the S&P 500 Index, a benchmark for US equities.",
+	  Bitcoin: "A decentralized digital currency powered by blockchain technology."
+	};
   </script>
   
   <style>
 	.app-container {
 	  font-family: Arial, sans-serif;
 	  margin: 20px;
+	  transition: background 0.3s, color 0.3s;
+	}
+  
+	.app-container.light {
+	  background: #ffffff;
+	  color: #000000;
+	}
+  
+	.app-container.dark {
+	  background: #1e1e1e;
+	  color: #ffffff;
 	}
   
 	.header {
@@ -66,13 +89,23 @@
 	  font-weight: bold;
 	}
   
-	.chart-placeholder {
-	  border: 2px dashed #ccc;
-	  height: 400px;
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	  color: #888;
+	.theme-toggle {
+	  position: fixed;
+	  top: 10px;
+	  right: 10px;
+	  background: #007acc;
+	  color: white;
+	  border: none;
+	  border-radius: 4px;
+	  padding: 5px 10px;
+	  cursor: pointer;
+	  font-size: 1em;
+	}
+  
+	.description {
+	  text-align: center;
+	  margin: 20px 0;
+	  font-style: italic;
 	}
   
 	label {
@@ -80,13 +113,19 @@
 	}
   </style>
   
-  <div class="app-container">
+  <div class="app-container {theme}">
+	<!-- Theme Toggle -->
+	<button class="theme-toggle" on:click={toggleTheme}>
+	  Toggle {theme === "light" ? "Dark" : "Light"} Mode
+	</button>
+  
 	<div class="header">
 	  <h1>Recurring Asset Analysis</h1>
 	  <p>Analyze the impact of recurring weekly investments.</p>
 	</div>
   
 	<div class="filters">
+	  <!-- Asset Dropdown -->
 	  <div class="filter-group">
 		<label for="asset-select">Select Asset:</label>
 		<select id="asset-select" bind:value={selectedAsset}>
@@ -97,6 +136,7 @@
 	  </div>
 	</div>
   
+	<!-- Time Filter Buttons -->
 	<div class="filter-group">
 	  <label for="time-frame-select">Time Frame:</label>
 	  <div class="time-buttons" id="time-frame-select">
@@ -111,6 +151,12 @@
 	  </div>
 	</div>
   
+	<!-- Asset Description -->
+	<div class="description">
+	  {assetDescriptions[selectedAsset]}
+	</div>
+  
+	<!-- Placeholder for Line Chart -->
 	<div class="chart-placeholder">
 	  <p>Line Chart Placeholder for {selectedTimeFrame.label}</p>
 	</div>

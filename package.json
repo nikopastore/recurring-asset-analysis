@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "dev": "rollup -c -w",
-    "dev:open": "npm run dev & start http://localhost:5000",
-    "build": "rollup -c",
-    "deploy": "npm run build && gh-pages -d public --cache-dir .gh-pages-cache"
-  },
+"scripts": {
+  "dev": "rollup -c -w",
+  "dev:open": "npm run dev & start http://localhost:35731",
+  "build": "rollup -c",
+  "deploy": "npm run build && gh-pages -d public"
+},
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
