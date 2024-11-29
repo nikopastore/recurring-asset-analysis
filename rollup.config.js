@@ -18,24 +18,24 @@ export default {
   plugins: [
     svelte({
       compilerOptions: {
-        dev: !production, // Enable dev mode when not in production
+        dev: !production,
       },
-      emitCss: true, // Emit CSS to a separate file
+      emitCss: true,
     }),
-    css({ output: 'bundle.css' }), // Write CSS to bundle.css
+    css({ output: 'bundle.css' }),
     resolve({
-      browser: true, // Resolve browser-compatible modules
-      dedupe: ['svelte'], // Avoid duplicate Svelte modules
+      browser: true,
+      dedupe: ['svelte'],
     }),
-    commonjs(), // Convert CommonJS modules to ES modules
+    commonjs(),
     !production &&
-  livereload({
-    watch: 'public',
-    port: 35731, // Use a different port
-  }),
-    production && terser(), // Minify JavaScript in production
+      livereload({
+        watch: 'public', // Ensure 'public' folder is watched for changes
+        port: 35731,
+      }),
+    production && terser(),
   ],
   watch: {
-    clearScreen: false, // Prevent clearing the console on rebuild
+    clearScreen: false,
   },
 };
