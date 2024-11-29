@@ -1,9 +1,11 @@
 <script>
     import { onMount } from "svelte";
+    import * as d3 from "d3";
 
     // Assets and default selection
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
+    let investmentAmount = 100; // Default weekly investment amount
 
     // Time frames
     const timeFrames = [
@@ -14,7 +16,7 @@
         { label: "Past 10 Years", months: 120 },
         { label: "Past 25 Years", months: 300 },
     ];
-    let selectedTimeFrame = timeFrames[2]; // Default to 1 Year
+    let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
 
     // Descriptions for assets
     const assetDescriptions = {
@@ -29,10 +31,10 @@
     let loading = true;
     let errorMessage = "";
 
-    // Fetch data
+    // Fetch and process data
     onMount(async () => {
         try {
-            const response = await fetch("./normalized_prices.json");
+            const response = await fetch("/normalized_prices.json");
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
             updateFilteredData();
@@ -44,7 +46,7 @@
         }
     });
 
-    // Update filtered data
+    // Filter data dynamically
     $: updateFilteredData();
     function updateFilteredData() {
         if (!assetData || assetData.length === 0) return;
@@ -57,163 +59,151 @@
                 record.Asset === selectedAsset &&
                 new Date(record.Date) >= cutoffDate
         );
+        drawChart(); // Re-render chart when data changes
     }
 
-    // Handle asset and time frame changes
-    function handleAssetChange(event) {
-        selectedAsset = event.target.value;
-    }
+    // Draw the D3.js chart
+    let chartContainer;
+    function drawChart() {
+        if (!filteredData || filteredData.length === 0) return;
 
-    function handleTimeFrameChange(timeFrame) {
-        selectedTimeFrame = timeFrame;
+        const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        // Remove any existing chart
+        d3.select(chartContainer).select("svg").remove();
+
+        // Create SVG
+        const svg = d3
+            .select(chartContainer)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Parse data for lines
+        const groupedData = d3.group(filteredData, (d) => new Date(d.Date).getDay()); // Group by weekday
+
+        const x = d3
+            .scaleTime()
+            .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
+            .range([0, width]);
+
+        const y = d3
+            .scaleLinear()
+            .domain([0, d3.max(filteredData, (d) => d.Close * investmentAmount)])
+            .nice()
+            .range([height, 0]);
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        // Add axes
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+        svg.append("g").call(d3.axisLeft(y));
+
+        // Add lines
+        groupedData.forEach((values, day) => {
+            svg.append("path")
+                .datum(values)
+                .attr("fill", "none")
+                .attr("stroke", color(day))
+                .attr("stroke-width", 2)
+                .attr(
+                    "d",
+                    d3
+                        .line()
+                        .x((d) => x(new Date(d.Date)))
+                        .y((d) => y(d.Close * investmentAmount))
+                );
+        });
+
+        // Add labels
+        svg
+            .append("text")
+            .attr("x", width / 2)
+            .attr("y", height + margin.bottom - 10)
+            .attr("text-anchor", "middle")
+            .text("Time");
+
+        svg
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2)
+            .attr("y", -margin.left + 10)
+            .attr("text-anchor", "middle")
+            .text("Investment Value ($)");
     }
 </script>
 
 <style>
     body {
-        margin: 0;
         font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        color: #333;
+        background: #f9f9f9;
     }
 
-    h1 {
-        text-align: center;
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .chart-container {
         margin-top: 20px;
     }
 
-    .filter-container {
+    .controls {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        margin: 20px auto;
+        justify-content: space-between;
+        margin-top: 20px;
     }
 
-    select {
-        padding: 8px;
-        font-size: 16px;
+    .controls label,
+    .controls input {
+        margin-right: 10px;
     }
 
-    .time-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-    }
-
-    .time-buttons button {
-        padding: 8px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        background: #f5f5f5;
-        border-radius: 4px;
-        transition: background 0.2s, color 0.2s;
-        cursor: pointer;
-    }
-
-    .time-buttons button:hover {
-        background: #007acc;
-        color: white;
-    }
-
-    .time-buttons button.active {
-        background: #007acc;
-        color: white;
-        font-weight: bold;
-    }
-
-    .description {
-        text-align: center;
-        font-style: italic;
-        margin: 20px;
-    }
-
-    .data-list {
-        max-width: 800px;
-        margin: 20px auto;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 10px;
-        background-color: #fff;
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .data-list ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .data-list li {
-        padding: 5px 0;
-        border-bottom: 1px solid #eee;
-    }
-
-    .data-list li:last-child {
-        border-bottom: none;
-    }
-
-    .error {
-        color: red;
-        text-align: center;
-        margin: 20px;
+    button {
+        margin: 5px;
     }
 </style>
 
-<div>
-    <!-- Page Title -->
-    <h1>Recurring Asset Analysis</h1>
+<div class="container">
+    <h1>Recurring Investment Analysis</h1>
+    <p>{assetDescriptions[selectedAsset]}</p>
 
-    <!-- Filters -->
-    <div class="filter-container">
-        <!-- Asset Dropdown -->
+    <!-- Controls -->
+    <div class="controls">
         <div>
             <label for="asset-select">Select Asset:</label>
-            <select id="asset-select" on:change={handleAssetChange}>
+            <select id="asset-select" bind:value={selectedAsset}>
                 {#each assets as asset}
                     <option value={asset}>{asset}</option>
                 {/each}
             </select>
         </div>
-
-        <!-- Time Frame Buttons -->
-        <div class="time-buttons">
-            {#each timeFrames as timeFrame (timeFrame.label)}
-                <button
-                    class:selected={selectedTimeFrame === timeFrame}
-                    on:click={() => handleTimeFrameChange(timeFrame)}
-                >
-                    {timeFrame.label}
-                </button>
-            {/each}
+        <div>
+            <label>Weekly Investment ($):</label>
+            <input type="number" bind:value={investmentAmount} min="1" />
         </div>
     </div>
 
-    <!-- Asset Description -->
-    <div class="description">
-        {assetDescriptions[selectedAsset]}
+    <!-- Time Frame Buttons -->
+    <div>
+        {#each timeFrames as timeFrame}
+            <button
+                class:selected={selectedTimeFrame === timeFrame}
+                on:click={() => (selectedTimeFrame = timeFrame)}
+            >
+                {timeFrame.label}
+            </button>
+        {/each}
     </div>
 
-    <!-- Error Message -->
+    <!-- Chart -->
+    <div class="chart-container" bind:this={chartContainer}></div>
+
     {#if errorMessage}
-        <p class="error">{errorMessage}</p>
+        <p style="color: red;">{errorMessage}</p>
     {/if}
-
-    <!-- Data Display -->
-    <div class="data-list">
-        {#if loading}
-            <p>Loading data...</p>
-        {:else if filteredData.length === 0}
-            <p>No data available for {selectedAsset} in the selected time frame.</p>
-        {:else}
-            <ul>
-                {#each filteredData as { Date, Close }}
-                    <li>
-                        <strong>{Date}:</strong> ${Close.toFixed(2)}
-                    </li>
-                {/each}
-            </ul>
-        {/if}
-    </div>
 </div>
