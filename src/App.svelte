@@ -12,12 +12,6 @@
     ];
 
     let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
-    let theme = "light"; // Default theme
-
-    const toggleTheme = () => {
-        theme = theme === "light" ? "dark" : "light";
-        document.body.className = theme; // Apply theme globally
-    };
 
     const assetDescriptions = {
         Gold: "A precious metal often seen as a hedge against inflation.",
@@ -27,36 +21,24 @@
 </script>
 
 <style>
-    /* Global Light/Dark Theme Styles */
-    body.light {
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
         background-color: #ffffff;
         color: #000000;
     }
 
-    body.dark {
-        background-color: #1e1e1e;
-        color: #ffffff;
-    }
-
-    .app-container {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: background 0.3s, color 0.3s;
-    }
-
     .header {
         text-align: center;
-        margin-bottom: 20px;
+        margin: 20px 0;
     }
 
     .filters {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin: 20px auto;
+        max-width: 800px;
     }
 
     .filter-group {
@@ -93,19 +75,6 @@
         font-weight: bold;
     }
 
-    .theme-toggle {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: #007acc;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 5px 10px;
-        cursor: pointer;
-        font-size: 1em;
-    }
-
     .description {
         text-align: center;
         margin: 20px 0;
@@ -119,12 +88,10 @@
         align-items: center;
         justify-content: center;
         color: #888;
-        background: #f9f9f9; /* Light mode background */
-    }
-
-    body.dark .chart-placeholder {
-        background: #2a2a2a; /* Dark mode background */
-        color: #bbb;
+        background: #f9f9f9;
+        margin: 20px auto;
+        width: calc(100% - 40px); /* Spans almost the full width */
+        max-width: 1200px; /* Prevents it from becoming too wide on large screens */
     }
 
     label {
@@ -132,17 +99,14 @@
     }
 </style>
 
-<div class="app-container">
-    <button class="theme-toggle" on:click={toggleTheme}>
-        Toggle {theme === "light" ? "Dark" : "Light"} Mode
-    </button>
-
+<div>
     <div class="header">
         <h1>Recurring Asset Analysis</h1>
         <p>Analyze the impact of recurring weekly investments.</p>
     </div>
 
     <div class="filters">
+        <!-- Asset Dropdown -->
         <div class="filter-group">
             <label for="asset-select">Select Asset:</label>
             <select id="asset-select" bind:value={selectedAsset}>
@@ -153,6 +117,7 @@
         </div>
     </div>
 
+    <!-- Time Filter Buttons -->
     <div class="filter-group">
         <label for="time-frame-select">Time Frame:</label>
         <div class="time-buttons" id="time-frame-select">
@@ -167,10 +132,12 @@
         </div>
     </div>
 
+    <!-- Asset Description -->
     <div class="description">
         {assetDescriptions[selectedAsset]}
     </div>
 
+    <!-- Placeholder for Line Chart -->
     <div class="chart-placeholder">
         <p>Line Chart Placeholder for {selectedTimeFrame.label}</p>
     </div>
