@@ -23,7 +23,7 @@
     let assetData = [];
     let loading = true;
 
-    fetch("/historical_prices.json")
+    fetch("./historical_prices.json")
         .then((response) => response.json())
         .then((data) => {
             assetData = data;
@@ -110,10 +110,6 @@
         max-width: 1200px; /* Prevents it from becoming too wide on large screens */
     }
 
-    label {
-        margin-bottom: 5px;
-    }
-
     .data-list {
         max-height: 300px;
         overflow-y: auto;
@@ -124,6 +120,10 @@
         max-width: 800px;
         background: #f9f9f9;
         border-radius: 4px;
+    }
+
+    label {
+        margin-bottom: 5px;
     }
 </style>
 
@@ -162,7 +162,7 @@
 
     <!-- Asset Description -->
     <div class="description">
-        {assetDescriptions[selectedAsset]}
+        {assetDescriptions[selectedAsset] || "No description available."}
     </div>
 
     <!-- Placeholder for Line Chart -->
@@ -174,11 +174,13 @@
     <div class="data-list">
         {#if loading}
             <p>Loading data...</p>
+        {:else if assetData.length === 0}
+            <p>No data available.</p>
         {:else}
             <ul>
-                {#each assetData as record}
+                {#each assetData.filter(record => record.Asset === selectedAsset) as { Asset, Date, Close }}
                     <li>
-                        {record.Asset}: {record.Date} - ${record.Close ? record.Close.toFixed(2) : "N/A"}
+                        <strong>{Asset}</strong>: {Date} - ${Close ? Close.toFixed(2) : "N/A"}
                     </li>
                 {/each}
             </ul>
