@@ -18,7 +18,7 @@
     ];
     let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
 
-    // Asset descriptions
+    // Descriptions for assets
     const assetDescriptions = {
         Gold: "Gold is a precious metal often considered a hedge against inflation.",
         SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
@@ -31,10 +31,10 @@
     let loading = true;
     let errorMessage = "";
 
-    // Fetch and process data
+    // Fetch data
     onMount(async () => {
         try {
-            const response = await fetch("/normalized_prices.json");
+            const response = await fetch("./normalized_prices.json");
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
             updateFilteredData();
@@ -46,7 +46,7 @@
         }
     });
 
-    // Filter data dynamically
+    // Update filtered data
     $: updateFilteredData();
     function updateFilteredData() {
         if (!assetData || assetData.length === 0) return;
@@ -59,6 +59,7 @@
                 record.Asset === selectedAsset &&
                 new Date(record.Date) >= cutoffDate
         );
+
         drawChart(); // Re-render chart when data changes
     }
 
@@ -83,9 +84,7 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Prepare data
-        const groupedData = d3.group(filteredData, (d) => new Date(d.Date).getDay());
-
+        // Prepare scales
         const x = d3
             .scaleTime()
             .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
@@ -103,21 +102,19 @@
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
         svg.append("g").call(d3.axisLeft(y));
 
-        // Add lines for each day of the week
-        groupedData.forEach((values, day) => {
-            svg.append("path")
-                .datum(values)
-                .attr("fill", "none")
-                .attr("stroke", color(day))
-                .attr("stroke-width", 2)
-                .attr(
-                    "d",
-                    d3
-                        .line()
-                        .x((d) => x(new Date(d.Date)))
-                        .y((d) => y(d.Close * investmentAmount))
-                );
-        });
+        // Add the line for filtered data
+        svg.append("path")
+            .datum(filteredData)
+            .attr("fill", "none")
+            .attr("stroke", color(0))
+            .attr("stroke-width", 2)
+            .attr(
+                "d",
+                d3
+                    .line()
+                    .x((d) => x(new Date(d.Date)))
+                    .y((d) => y(d.Close * investmentAmount))
+            );
 
         // Add labels
         svg
@@ -135,6 +132,15 @@
             .attr("text-anchor", "middle")
             .text("Investment Value ($)");
     }
+
+    // Handle asset and time frame changes
+    function handleAssetChange(event) {
+        selectedAsset = event.target.value;
+    }
+
+    function handleTimeFrameChange(timeFrame) {
+        selectedTimeFrame = timeFrame;
+    }
 </script>
 
 <style>
@@ -150,6 +156,7 @@
     .controls {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         margin-top: 20px;
     }
 
@@ -158,25 +165,62 @@
         margin-right: 10px;
     }
 
-    button {
-        margin: 5px;
+    select {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    .time-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .time-buttons button {
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .time-buttons button:hover {
+        background: #007acc;
+        color: white;
+    }
+
+    .time-buttons button.active {
+        background: #007acc;
+        color: white;
+        font-weight: bold;
+    }
+
+    .description {
+        text-align: center;
+        font-style: italic;
+        margin: 20px;
     }
 </style>
 
 <div class="container">
     <h1>Recurring Investment Analysis</h1>
-    <p>{assetDescriptions[selectedAsset]}</p>
+    <p class="description">{assetDescriptions[selectedAsset]}</p>
 
     <!-- Controls -->
     <div class="controls">
+        <!-- Asset Dropdown -->
         <div>
             <label for="asset-select">Select Asset:</label>
-            <select id="asset-select" bind:value={selectedAsset}>
+            <select id="asset-select" on:change={handleAssetChange}>
                 {#each assets as asset}
                     <option value={asset}>{asset}</option>
                 {/each}
             </select>
         </div>
+
+        <!-- Investment Amount -->
         <div>
             <label>Weekly Investment ($):</label>
             <input type="number" bind:value={investmentAmount} min="1" />
@@ -184,11 +228,11 @@
     </div>
 
     <!-- Time Frame Buttons -->
-    <div>
+    <div class="time-buttons">
         {#each timeFrames as timeFrame}
             <button
                 class:selected={selectedTimeFrame === timeFrame}
-                on:click={() => (selectedTimeFrame = timeFrame)}
+                on:click={() => handleTimeFrameChange(timeFrame)}
             >
                 {timeFrame.label}
             </button>
@@ -198,6 +242,7 @@
     <!-- Chart -->
     <div class="chart-container" bind:this={chartContainer}></div>
 
+    <!-- Error Message -->
     {#if errorMessage}
         <p style="color: red;">{errorMessage}</p>
     {/if}
