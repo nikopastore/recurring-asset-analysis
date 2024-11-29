@@ -2,6 +2,8 @@
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
+    $: console.log("Selected Asset:", selectedAsset);
+
     const timeFrames = [
         { label: "Past Month", months: 1 },
         { label: "Past 6 Months", months: 6 },
