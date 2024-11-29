@@ -1,11 +1,11 @@
 <script>
     import { onMount } from "svelte";
 
-    // Define assets and default selection
+    // Assets and default selection
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
-    // Define time frames
+    // Time frames
     const timeFrames = [
         { label: "Past Month", months: 1 },
         { label: "Past 6 Months", months: 6 },
@@ -14,9 +14,9 @@
         { label: "Past 10 Years", months: 120 },
         { label: "Past 25 Years", months: 300 },
     ];
-    let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
+    let selectedTimeFrame = timeFrames[2]; // Default to 1 Year
 
-    // Asset descriptions
+    // Descriptions for assets
     const assetDescriptions = {
         Gold: "Gold is a precious metal often considered a hedge against inflation.",
         SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
@@ -29,13 +29,12 @@
     let loading = true;
     let errorMessage = "";
 
-    // Fetch data on mount
+    // Fetch data
     onMount(async () => {
         try {
-            const response = await fetch("/normalized_prices.json");
+            const response = await fetch("./normalized_prices.json");
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
-            console.log("Data loaded:", assetData);
             updateFilteredData();
         } catch (error) {
             errorMessage = `Error loading data: ${error.message}`;
@@ -45,13 +44,10 @@
         }
     });
 
-    // Update filtered data based on selected asset and time frame
+    // Update filtered data
     $: updateFilteredData();
     function updateFilteredData() {
-        if (!assetData || assetData.length === 0) {
-            filteredData = [];
-            return;
-        }
+        if (!assetData || assetData.length === 0) return;
 
         const today = new Date();
         const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
@@ -63,6 +59,7 @@
         );
     }
 
+    // Handle asset and time frame changes
     function handleAssetChange(event) {
         selectedAsset = event.target.value;
     }
@@ -89,14 +86,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 20px;
         margin: 20px auto;
     }
 
-    select, button {
+    select {
         padding: 8px;
         font-size: 16px;
-        cursor: pointer;
     }
 
     .time-buttons {
@@ -107,10 +103,13 @@
     }
 
     .time-buttons button {
+        padding: 8px;
+        font-size: 14px;
         border: 1px solid #ccc;
         background: #f5f5f5;
         border-radius: 4px;
         transition: background 0.2s, color 0.2s;
+        cursor: pointer;
     }
 
     .time-buttons button:hover {
@@ -142,8 +141,8 @@
     }
 
     .data-list ul {
-        padding: 0;
         list-style: none;
+        padding: 0;
     }
 
     .data-list li {
@@ -162,7 +161,6 @@
     }
 </style>
 
-<!-- HTML Structure -->
 <div>
     <!-- Page Title -->
     <h1>Recurring Asset Analysis</h1>
