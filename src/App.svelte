@@ -18,7 +18,7 @@
     ];
     let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
 
-    // Descriptions for assets
+    // Asset descriptions
     const assetDescriptions = {
         Gold: "Gold is a precious metal often considered a hedge against inflation.",
         SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
@@ -71,7 +71,7 @@
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
-        // Remove any existing chart
+        // Clear existing chart
         d3.select(chartContainer).select("svg").remove();
 
         // Create SVG
@@ -83,8 +83,8 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Parse data for lines
-        const groupedData = d3.group(filteredData, (d) => new Date(d.Date).getDay()); // Group by weekday
+        // Prepare data
+        const groupedData = d3.group(filteredData, (d) => new Date(d.Date).getDay());
 
         const x = d3
             .scaleTime()
@@ -103,7 +103,7 @@
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
         svg.append("g").call(d3.axisLeft(y));
 
-        // Add lines
+        // Add lines for each day of the week
         groupedData.forEach((values, day) => {
             svg.append("path")
                 .datum(values)
@@ -138,11 +138,6 @@
 </script>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f9f9f9;
-    }
-
     .container {
         max-width: 900px;
         margin: 0 auto;
