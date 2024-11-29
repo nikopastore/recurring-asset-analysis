@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import Chart from "./chart.svelte"; // Import the new chart component
+    import Chart from "./Chart.svelte";// Import the new chart component
 
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
