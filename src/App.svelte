@@ -32,7 +32,7 @@
 
     onMount(async () => {
         try {
-            const response = await fetch("./data/normalized_prices.json");
+            const response = await fetch("/normalized_prices.json");
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
             console.log("Data loaded:", assetData);
