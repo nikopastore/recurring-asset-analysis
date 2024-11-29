@@ -18,6 +18,22 @@
         SPY: "An ETF tracking the S&P 500 Index, a benchmark for US equities.",
         Bitcoin: "A decentralized digital currency powered by blockchain technology.",
     };
+
+    // Data fetching
+    let assetData = [];
+    let loading = true;
+
+    fetch("/historical_prices.json")
+        .then((response) => response.json())
+        .then((data) => {
+            assetData = data;
+            loading = false;
+            console.log("Data loaded:", assetData);
+        })
+        .catch((error) => {
+            console.error("Error fetching data:", error);
+            loading = false;
+        });
 </script>
 
 <style>
@@ -97,6 +113,18 @@
     label {
         margin-bottom: 5px;
     }
+
+    .data-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        margin: 20px auto;
+        padding: 10px;
+        width: calc(100% - 40px);
+        max-width: 800px;
+        background: #f9f9f9;
+        border-radius: 4px;
+    }
 </style>
 
 <div>
@@ -140,5 +168,20 @@
     <!-- Placeholder for Line Chart -->
     <div class="chart-placeholder">
         <p>Line Chart Placeholder for {selectedTimeFrame.label}</p>
+    </div>
+
+    <!-- Data Display -->
+    <div class="data-list">
+        {#if loading}
+            <p>Loading data...</p>
+        {:else}
+            <ul>
+                {#each assetData as record}
+                    <li>
+                        {record.Asset}: {record.Date} - ${record.Close ? record.Close.toFixed(2) : "N/A"}
+                    </li>
+                {/each}
+            </ul>
+        {/if}
     </div>
 </div>
