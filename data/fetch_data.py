@@ -17,8 +17,9 @@ data_frames = {}
 for asset, ticker in tickers.items():
     print(f"Fetching data for {asset}...")
     df = yf.download(ticker, start=start_date, end=end_date)
-    df["Asset"] = asset
-    df = df[["Asset", "Date", "Close"]].reset_index()
+    df.reset_index(inplace=True)  # Reset the index to make Date a column
+    df["Asset"] = asset  # Add an Asset column
+    df = df[["Asset", "Date", "Close"]]  # Keep relevant columns
     data_frames[asset] = df
 
 # Combine all data into one DataFrame
