@@ -16,6 +16,7 @@
   
 	const toggleTheme = () => {
 	  theme = theme === "light" ? "dark" : "light";
+	  document.body.className = theme; // Apply the theme to the entire page
 	};
   
 	// Asset descriptions
@@ -27,18 +28,22 @@
   </script>
   
   <style>
+	/* App-wide styles */
 	.app-container {
 	  font-family: Arial, sans-serif;
 	  margin: 20px;
-	  transition: background 0.3s, color 0.3s;
+	  padding: 20px;
+	  border-radius: 8px;
+	  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 	}
   
-	.app-container.light {
+	/* Light/Dark mode background */
+	body.light {
 	  background: #ffffff;
 	  color: #000000;
 	}
   
-	.app-container.dark {
+	body.dark {
 	  background: #1e1e1e;
 	  color: #ffffff;
 	}
@@ -108,12 +113,27 @@
 	  font-style: italic;
 	}
   
+	.chart-placeholder {
+	  border: 2px dashed #ccc;
+	  height: 400px;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  color: #888;
+	  background: #f9f9f9; /* Light mode background */
+	}
+  
+	body.dark .chart-placeholder {
+	  background: #2a2a2a; /* Dark mode background */
+	  color: #bbb;
+	}
+  
 	label {
 	  margin-bottom: 5px;
 	}
   </style>
   
-  <div class="app-container {theme}">
+  <div class="app-container">
 	<!-- Theme Toggle -->
 	<button class="theme-toggle" on:click={toggleTheme}>
 	  Toggle {theme === "light" ? "Dark" : "Light"} Mode
