@@ -10,7 +10,7 @@
     $: drawChart();
 
     function drawChart() {
-        console.log("Chart Data:", data); // Debugging: Logs data passed to Chart
+        console.log("Chart Data:", data); // Debugging: Log the data being used
 
         if (!data || data.length === 0) {
             console.log("No data to display");
@@ -24,13 +24,18 @@
         // Clear existing chart
         d3.select(chartContainer).select("svg").remove();
 
-        // Parse the dates
+        // Parse dates and calculate investment values
         const parseDate = d3.timeParse("%Y-%m-%d");
         const formattedData = data.map(d => ({
             ...d,
             Date: parseDate(d.Date),
             InvestmentValue: d.Close * investmentAmount
         }));
+
+        if (formattedData.some(d => isNaN(d.Date) || isNaN(d.InvestmentValue))) {
+            console.error("Invalid data for chart:", formattedData);
+            return;
+        }
 
         // Create SVG container
         const svg = d3
