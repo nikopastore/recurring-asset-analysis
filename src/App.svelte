@@ -57,7 +57,7 @@
                 new Date(record.Date) >= cutoffDate
         );
 
-        console.log("Filtered Data:", filteredData); // Debugging
+        console.log("Filtered Data:", filteredData); // Debugging: Logs filtered data
     }
 
     function handleAssetChange(event) {
@@ -186,6 +186,6 @@
 
     <!-- Chart Container -->
     <div class="chart-container">
-        <Chart {data}={filteredData} {investmentAmount} />
+        <Chart data={filteredData} investmentAmount={investmentAmount} />
     </div>
 </div>
