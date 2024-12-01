@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
     import Chart from "./Chart.svelte";
 
-    // Asset options and descriptions
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
@@ -12,12 +11,11 @@
         { label: "Past 1 Year", months: 12 },
         { label: "Past 5 Years", months: 60 },
         { label: "Past 10 Years", months: 120 },
-        { label: "Past 25 Years", months: 300 }
+        { label: "Past 25 Years", months: 300 },
     ];
     let selectedTimeFrame = timeFrames[2];
     let investmentAmount = 100;
 
-    // Asset descriptions
     const assetDescriptions = {
         Gold: "Gold is a precious metal often considered a hedge against inflation.",
         SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
@@ -29,7 +27,6 @@
     let loading = true;
     let errorMessage = "";
 
-    // Fetch and load data
     onMount(async () => {
         try {
             const response = await fetch("./normalized_prices_with_days.json");
@@ -49,11 +46,21 @@
 
         const today = new Date();
         const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
-        filteredData = assetData.filter(
-            (record) =>
-                record.Asset === selectedAsset &&
-                new Date(record.Date) >= cutoffDate
-        );
+
+        filteredData = assetData
+            .filter(
+                (record) =>
+                    record.Asset === selectedAsset &&
+                    new Date(record.Date) >= cutoffDate
+            )
+            .map((record) => ({
+                ...record,
+                WeeklyInvestment: calculateInvestment(record.Close),
+            }));
+    }
+
+    function calculateInvestment(price) {
+        return (investmentAmount / price).toFixed(2);
     }
 
     function handleAssetChange(event) {
@@ -135,7 +142,6 @@
 <div class="container">
     <h1>Recurring Asset Analysis</h1>
 
-    <!-- Filters -->
     <div class="filter-container">
         <!-- Asset Dropdown -->
         <div>
