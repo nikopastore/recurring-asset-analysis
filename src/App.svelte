@@ -44,7 +44,6 @@
                 record.Asset === selectedAsset &&
                 new Date(record.Date) >= cutoffDate
         );
-        console.log("Filtered Data:", filteredData); // Debug filtered data
     }
 
     function handleAssetChange(event) {
@@ -57,7 +56,95 @@
 </script>
 
 <style>
-    /* Add your styles here */
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .filter-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin: 20px auto;
+    }
+
+    select {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    .time-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .time-buttons button {
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        border-radius: 4px;
+        transition: background 0.2s, color 0.2s;
+        cursor: pointer;
+    }
+
+    .time-buttons button:hover {
+        background: #007acc;
+        color: white;
+    }
+
+    .time-buttons button.active {
+        background: #007acc;
+        color: white;
+        font-weight: bold;
+    }
+
+    .description {
+        text-align: center;
+        font-style: italic;
+        margin: 20px;
+    }
+
+    .data-list {
+        max-width: 800px;
+        margin: 20px auto;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #fff;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .data-list ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .data-list li {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .data-list li:last-child {
+        border-bottom: none;
+    }
+
+    .error {
+        color: red;
+        text-align: center;
+        margin: 20px;
+    }
 </style>
 
 <div>

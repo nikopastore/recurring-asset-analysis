@@ -8,16 +8,15 @@
 
     $: {
         if (filteredData.length) {
-            console.log("Raw Data for Chart:", filteredData); // Log raw data for debugging
             drawChart();
         }
     }
 
     function drawChart() {
-        // Clear the previous chart
+        // Clear any existing chart
         d3.select(chart).selectAll("*").remove();
 
-        // Chart dimensions
+        // Chart dimensions and margins
         const margin = { top: 20, right: 30, bottom: 50, left: 60 };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
@@ -31,28 +30,20 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Parse and prepare data
+        // Parse the dates and calculate values
         const parseDate = d3.timeParse("%Y-%m-%d");
         const processedData = filteredData.map(d => ({
             ...d,
-            Date: parseDate(d.Date), // Parse the date string
-            Value: d.Close * investmentAmount // Compute the investment value
+            Date: parseDate(d.Date), // Convert string to Date object
+            Value: d.Close * investmentAmount // Calculate investment value
         }));
 
-        console.log("Processed Data for Chart:", processedData); // Debug processed data
-
-        // Set up scales
+        // X-axis scale
         const x = d3
             .scaleTime()
             .domain(d3.extent(processedData, d => d.Date))
             .range([0, width]);
 
-        const y = d3
-            .scaleLinear()
-            .domain([0, d3.max(processedData, d => d.Value)]) // Use Value for y-axis
-            .range([height, 0]);
-
-        // Add X-axis
         svg.append("g")
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x))
@@ -62,17 +53,22 @@
             .attr("fill", "black")
             .text("Date");
 
-        // Add Y-axis
+        // Y-axis scale
+        const y = d3
+            .scaleLinear()
+            .domain([0, d3.max(processedData, d => d.Value)])
+            .range([height, 0]);
+
         svg.append("g")
             .call(d3.axisLeft(y))
             .append("text")
             .attr("transform", "rotate(-90)")
             .attr("x", -height / 2)
-            .attr("y", -40)
+            .attr("y", -50)
             .attr("fill", "black")
             .text("Investment Value ($)");
 
-        // Add the line
+        // Add line to the chart
         svg.append("path")
             .datum(processedData)
             .attr("fill", "none")
@@ -86,37 +82,40 @@
                     .y(d => y(d.Value))
             );
 
-        // Add dots for each data point
+        // Add hover effect with tooltip
+        const tooltip = d3
+            .select(chart)
+            .append("div")
+            .style("position", "absolute")
+            .style("background", "#fff")
+            .style("border", "1px solid #ccc")
+            .style("padding", "5px")
+            .style("display", "none")
+            .style("pointer-events", "none");
+
         svg.selectAll("circle")
             .data(processedData)
             .enter()
             .append("circle")
             .attr("cx", d => x(d.Date))
             .attr("cy", d => y(d.Value))
-            .attr("r", 4)
+            .attr("r", 3)
             .attr("fill", "steelblue")
-            .attr("stroke", "white")
-            .attr("stroke-width", 1.5)
             .on("mouseover", (event, d) => {
-                const tooltip = d3.select("body")
-                    .append("div")
-                    .style("position", "absolute")
-                    .style("background", "#fff")
-                    .style("border", "1px solid #ccc")
-                    .style("padding", "5px")
-                    .style("pointer-events", "none")
-                    .html(`Date: ${d.Date.toDateString()}<br>Value: $${d.Value.toFixed(2)}`);
-                
-                tooltip.style("left", `${event.pageX + 10}px`)
-                       .style("top", `${event.pageY - 20}px`);
+                tooltip.style("display", "block")
+                    .html(`Date: ${d.Date.toDateString()}<br>Value: $${d.Value.toFixed(2)}`)
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 20}px`);
             })
-            .on("mouseout", () => d3.select("body").select("div").remove());
+            .on("mouseout", () => {
+                tooltip.style("display", "none");
+            });
     }
 </script>
 
 <style>
     div {
-        margin: 20px auto;
+        margin: 0 auto;
         max-width: 900px;
     }
 </style>
