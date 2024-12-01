@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import Chart from "./Chart.svelte";
 
+    // Asset options and descriptions
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
@@ -14,13 +15,21 @@
         { label: "Past 25 Years", months: 300 }
     ];
     let selectedTimeFrame = timeFrames[2];
-
     let investmentAmount = 100;
+
+    // Asset descriptions
+    const assetDescriptions = {
+        Gold: "Gold is a precious metal often considered a hedge against inflation.",
+        SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
+        Bitcoin: "Bitcoin is a decentralized digital currency created in 2009.",
+    };
+
     let assetData = [];
     let filteredData = [];
     let loading = true;
     let errorMessage = "";
 
+    // Fetch and load data
     onMount(async () => {
         try {
             const response = await fetch("./normalized_prices_with_days.json");
@@ -37,10 +46,11 @@
     $: updateFilteredData();
     function updateFilteredData() {
         if (!assetData.length) return;
+
         const today = new Date();
         const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
         filteredData = assetData.filter(
-            record =>
+            (record) =>
                 record.Asset === selectedAsset &&
                 new Date(record.Date) >= cutoffDate
         );
@@ -56,45 +66,76 @@
 </script>
 
 <style>
-    /* Styling for Filters, Inputs, and Chart Layout */
     body {
         font-family: Arial, sans-serif;
         margin: 0;
-        padding: 0;
+        background: #f9f9f9;
+        color: #333;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
     }
 
     .filter-container {
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
-        margin: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    select {
+        padding: 8px;
+        font-size: 16px;
     }
 
     .time-buttons {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
+        justify-content: center;
+    }
+
+    .time-buttons button {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .time-buttons button.active {
+        background: #007acc;
+        color: white;
+        font-weight: bold;
+    }
+
+    .description {
+        margin: 20px 0;
+        font-style: italic;
     }
 
     .investment-input {
-        text-align: center;
-        margin: 20px;
+        margin: 20px 0;
     }
 
     .chart-container {
-        margin: 20px auto;
-        max-width: 900px;
+        margin-top: 30px;
     }
 
     .error {
         color: red;
-        text-align: center;
     }
 </style>
 
-<div>
+<div class="container">
     <h1>Recurring Asset Analysis</h1>
 
-    <!-- Page Content: Filters and Chart -->
+    <!-- Filters -->
     <div class="filter-container">
         <!-- Asset Dropdown -->
         <div>
@@ -119,21 +160,28 @@
         </div>
     </div>
 
+    <!-- Weekly Investment -->
     <div class="investment-input">
-        <label for="investment-input">Weekly Investment ($):</label>
+        <label for="investment-amount">Weekly Investment ($):</label>
         <input
-            id="investment-input"
+            id="investment-amount"
             type="number"
             bind:value={investmentAmount}
             min="1"
         />
     </div>
 
+    <!-- Asset Description -->
+    <div class="description">
+        {assetDescriptions[selectedAsset]}
+    </div>
+
+    <!-- Chart -->
     {#if errorMessage}
         <p class="error">{errorMessage}</p>
+    {:else}
+        <div class="chart-container">
+            <Chart {filteredData} {investmentAmount} />
+        </div>
     {/if}
-
-    <div class="chart-container">
-        <Chart {filteredData} {investmentAmount} />
-    </div>
 </div>
