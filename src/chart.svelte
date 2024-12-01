@@ -8,7 +8,7 @@
 
     $: {
         if (filteredData.length) {
-            console.log("Chart Data:", filteredData); // Log to verify the data passed to the chart
+            console.log("Raw Data for Chart:", filteredData); // Log raw data for debugging
             drawChart();
         }
     }
@@ -35,9 +35,11 @@
         const parseDate = d3.timeParse("%Y-%m-%d");
         const processedData = filteredData.map(d => ({
             ...d,
-            Date: parseDate(d.Date),
-            Value: d.Close * investmentAmount,
+            Date: parseDate(d.Date), // Parse the date string
+            Value: d.Close * investmentAmount // Compute the investment value
         }));
+
+        console.log("Processed Data for Chart:", processedData); // Debug processed data
 
         // Set up scales
         const x = d3
@@ -47,7 +49,7 @@
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(processedData, d => d.Value)])
+            .domain([0, d3.max(processedData, d => d.Value)]) // Use Value for y-axis
             .range([height, 0]);
 
         // Add X-axis

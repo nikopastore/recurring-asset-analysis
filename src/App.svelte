@@ -11,19 +11,13 @@
         { label: "Past 1 Year", months: 12 },
         { label: "Past 5 Years", months: 60 },
         { label: "Past 10 Years", months: 120 },
-        { label: "Past 25 Years", months: 300 },
+        { label: "Past 25 Years", months: 300 }
     ];
-    let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
+    let selectedTimeFrame = timeFrames[2];
 
-    const assetDescriptions = {
-        Gold: "Gold is a precious metal often considered a hedge against inflation.",
-        SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
-        Bitcoin: "Bitcoin is a decentralized digital currency created in 2009.",
-    };
-
+    let investmentAmount = 100;
     let assetData = [];
     let filteredData = [];
-    let investmentAmount = 100;
     let loading = true;
     let errorMessage = "";
 
@@ -35,7 +29,6 @@
             updateFilteredData();
         } catch (error) {
             errorMessage = `Error loading data: ${error.message}`;
-            console.error(errorMessage);
         } finally {
             loading = false;
         }
@@ -44,17 +37,14 @@
     $: updateFilteredData();
     function updateFilteredData() {
         if (!assetData.length) return;
-
         const today = new Date();
         const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
-
         filteredData = assetData.filter(
-            (record) =>
+            record =>
                 record.Asset === selectedAsset &&
                 new Date(record.Date) >= cutoffDate
         );
-
-        console.log("Filtered Data:", filteredData);
+        console.log("Filtered Data:", filteredData); // Debug filtered data
     }
 
     function handleAssetChange(event) {
@@ -67,86 +57,13 @@
 </script>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        color: #333;
-    }
-
-    h1 {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .filter-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        margin: 20px auto;
-    }
-
-    select {
-        padding: 8px;
-        font-size: 16px;
-    }
-
-    .time-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-    }
-
-    .time-buttons button {
-        padding: 8px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        background: #f5f5f5;
-        border-radius: 4px;
-        transition: background 0.2s, color 0.2s;
-        cursor: pointer;
-    }
-
-    .time-buttons button:hover {
-        background: #007acc;
-        color: white;
-    }
-
-    .time-buttons button.active {
-        background: #007acc;
-        color: white;
-        font-weight: bold;
-    }
-
-    .description {
-        text-align: center;
-        font-style: italic;
-        margin: 20px;
-    }
-
-    .chart-container {
-        margin: 20px auto;
-        max-width: 900px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #fff;
-    }
-
-    .error {
-        color: red;
-        text-align: center;
-        margin: 20px;
-    }
+    /* Add your styles here */
 </style>
 
 <div>
     <h1>Recurring Asset Analysis</h1>
 
     <div class="filter-container">
-        <!-- Asset Dropdown -->
         <div>
             <label for="asset-select">Select Asset:</label>
             <select id="asset-select" on:change={handleAssetChange}>
@@ -156,18 +73,6 @@
             </select>
         </div>
 
-        <!-- Investment Amount -->
-        <div>
-            <label>Investment Amount ($):</label>
-            <input
-                type="number"
-                bind:value={investmentAmount}
-                min="1"
-                placeholder="Enter weekly investment"
-            />
-        </div>
-
-        <!-- Time Frame Buttons -->
         <div class="time-buttons">
             {#each timeFrames as timeFrame (timeFrame.label)}
                 <button
@@ -180,22 +85,19 @@
         </div>
     </div>
 
-    <!-- Asset Description -->
-    <div class="description">
-        {assetDescriptions[selectedAsset]}
+    <div>
+        <label for="investment-input">Weekly Investment ($):</label>
+        <input
+            id="investment-input"
+            type="number"
+            bind:value={investmentAmount}
+            min="1"
+        />
     </div>
 
-    <!-- Error Message -->
     {#if errorMessage}
         <p class="error">{errorMessage}</p>
     {/if}
 
-    <!-- Chart Container -->
-    {#if !loading}
-        <div class="chart-container">
-            <Chart {filteredData} {investmentAmount} />
-        </div>
-    {:else}
-        <p>Loading data...</p>
-    {/if}
+    <Chart {filteredData} {investmentAmount} />
 </div>
