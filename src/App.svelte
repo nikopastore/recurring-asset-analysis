@@ -73,6 +73,7 @@
 </script>
 
 <style>
+    /* Styling to match the base code format */
     body {
         font-family: Arial, sans-serif;
         margin: 0;

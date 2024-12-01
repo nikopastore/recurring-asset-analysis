@@ -62,7 +62,6 @@
                 );
         });
 
-        // Add hover interactivity
         const hoverLine = svg
             .append("line")
             .attr("stroke", "gray")
@@ -71,16 +70,18 @@
             .attr("y1", 0)
             .attr("y2", height);
 
-        svg.on("mousemove", (event) => {
-            const [mouseX] = d3.pointer(event);
-            const hoverDate = x.invert(mouseX);
-            hoverLine.attr("x1", mouseX).attr("x2", mouseX).attr("opacity", 1);
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "transparent")
+            .on("mousemove", (event) => {
+                const [mouseX] = d3.pointer(event);
+                const hoverDate = x.invert(mouseX);
+                hoverLine.attr("x1", mouseX).attr("x2", mouseX).attr("opacity", 1);
+            })
+            .on("mouseout", () => hoverLine.attr("opacity", 0));
 
-            // Add a tooltip to display values at the hovered date
-            // Implement this logic based on your specific requirements
-        });
-
-        // Legend
+        // Add legend
         const legend = svg
             .append("g")
             .attr("transform", `translate(0,${height + 30})`);
