@@ -2,11 +2,9 @@
     import { onMount } from "svelte";
     import Chart from "./Chart.svelte";
 
-    // Assets and default selection
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
-    // Time frames
     const timeFrames = [
         { label: "Past Month", months: 1 },
         { label: "Past 6 Months", months: 6 },
@@ -15,9 +13,8 @@
         { label: "Past 10 Years", months: 120 },
         { label: "Past 25 Years", months: 300 },
     ];
-    let selectedTimeFrame = timeFrames[2]; // Default to 1 Year
+    let selectedTimeFrame = timeFrames[2]; // Default: Past 1 Year
 
-    // Descriptions for assets
     const assetDescriptions = {
         Gold: "Gold is a precious metal often considered a hedge against inflation.",
         SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
@@ -26,7 +23,7 @@
 
     let assetData = [];
     let filteredData = [];
-    let investmentAmount = 100; // Default weekly investment
+    let investmentAmount = 100;
     let loading = true;
     let errorMessage = "";
 
@@ -46,7 +43,7 @@
 
     $: updateFilteredData();
     function updateFilteredData() {
-        if (!assetData || assetData.length === 0) return;
+        if (!assetData.length) return;
 
         const today = new Date();
         const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
@@ -57,7 +54,7 @@
                 new Date(record.Date) >= cutoffDate
         );
 
-        console.log("Filtered Data:", filteredData); // Debugging: Logs filtered data
+        console.log("Filtered Data:", filteredData);
     }
 
     function handleAssetChange(event) {
@@ -146,10 +143,8 @@
 </style>
 
 <div>
-    <!-- Page Title -->
     <h1>Recurring Asset Analysis</h1>
 
-    <!-- Filters -->
     <div class="filter-container">
         <!-- Asset Dropdown -->
         <div>
@@ -159,6 +154,17 @@
                     <option value={asset}>{asset}</option>
                 {/each}
             </select>
+        </div>
+
+        <!-- Investment Amount -->
+        <div>
+            <label>Investment Amount ($):</label>
+            <input
+                type="number"
+                bind:value={investmentAmount}
+                min="1"
+                placeholder="Enter weekly investment"
+            />
         </div>
 
         <!-- Time Frame Buttons -->
@@ -185,7 +191,11 @@
     {/if}
 
     <!-- Chart Container -->
-    <div class="chart-container">
-        <Chart data={filteredData} investmentAmount={investmentAmount} />
-    </div>
+    {#if !loading}
+        <div class="chart-container">
+            <Chart {filteredData} {investmentAmount} />
+        </div>
+    {:else}
+        <p>Loading data...</p>
+    {/if}
 </div>

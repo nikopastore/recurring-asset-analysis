@@ -1,85 +1,62 @@
 <script>
-    import { onMount } from "svelte";
     import * as d3 from "d3";
 
-    export let data = []; // Filtered data passed from App.svelte
-    export let investmentAmount = 100; // Weekly investment amount
+    export let filteredData = [];
+    export let investmentAmount = 100;
 
-    let chartContainer;
+    let chart;
 
-    $: drawChart();
+    $: {
+        if (filteredData.length) {
+            drawChart();
+        }
+    }
 
     function drawChart() {
-        console.log("Chart Data:", data); // Debugging: Log the data being used
-
-        if (!data || data.length === 0) {
-            console.log("No data to display");
-            return;
-        }
+        d3.select(chart).selectAll("*").remove();
 
         const margin = { top: 20, right: 30, bottom: 50, left: 50 };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
-        // Clear existing chart
-        d3.select(chartContainer).select("svg").remove();
-
-        // Parse dates and calculate investment values
-        const parseDate = d3.timeParse("%Y-%m-%d");
-        const formattedData = data.map(d => ({
-            ...d,
-            Date: parseDate(d.Date),
-            InvestmentValue: d.Close * investmentAmount
-        }));
-
-        if (formattedData.some(d => isNaN(d.Date) || isNaN(d.InvestmentValue))) {
-            console.error("Invalid data for chart:", formattedData);
-            return;
-        }
-
-        // Create SVG container
         const svg = d3
-            .select(chartContainer)
+            .select(chart)
             .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Create scales
         const x = d3
             .scaleTime()
-            .domain(d3.extent(formattedData, d => d.Date))
+            .domain(d3.extent(filteredData, d => new Date(d.Date)))
             .range([0, width]);
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(formattedData, d => d.InvestmentValue)])
-            .nice()
+            .domain([
+                0,
+                d3.max(filteredData, d => d.Close * investmentAmount)
+            ])
             .range([height, 0]);
 
-        // Add axes
-        svg.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %Y")));
-
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
         svg.append("g").call(d3.axisLeft(y));
 
-        // Add line
-        svg.append("path")
-            .datum(formattedData)
+        svg
+            .append("path")
+            .datum(filteredData)
             .attr("fill", "none")
             .attr("stroke", "steelblue")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 1.5)
             .attr(
                 "d",
                 d3
                     .line()
-                    .x(d => x(d.Date))
-                    .y(d => y(d.InvestmentValue))
+                    .x(d => x(new Date(d.Date)))
+                    .y(d => y(d.Close * investmentAmount))
             );
 
-        // Add labels
         svg
             .append("text")
             .attr("x", width / 2)
@@ -104,4 +81,4 @@
     }
 </style>
 
-<div bind:this={chartContainer}></div>
+<div bind:this={chart}></div>
