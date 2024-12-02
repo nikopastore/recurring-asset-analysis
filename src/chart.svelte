@@ -1,20 +1,21 @@
 <script>
     import * as d3 from "d3";
 
-    export let filteredData = [];
-    export let investmentAmount;
+    export let filteredData = {};
 
     let chart;
 
-    $: if (filteredData.length) {
-        drawChart();
+    $: {
+        if (Object.keys(filteredData).length) {
+            drawChart();
+        }
     }
 
     function drawChart() {
         d3.select(chart).selectAll("*").remove();
 
-        const margin = { top: 20, right: 30, bottom: 50, left: 60 };
-        const width = 700 - margin.left - margin.right;
+        const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+        const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
         const svg = d3
@@ -25,81 +26,56 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Group data by weekday
-        const groupedData = d3.groups(filteredData, (d) => d.Day);
-
-        const colors = d3.schemeTableau10;
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-        const colorScale = d3.scaleOrdinal().domain(days).range(colors);
-
         const x = d3
             .scaleTime()
-            .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
+            .domain([
+                d3.min(Object.values(filteredData).flatMap(d => d.values.map(v => new Date(v.date)))),
+                d3.max(Object.values(filteredData).flatMap(d => d.values.map(v => new Date(v.date))))
+            ])
             .range([0, width]);
-
-        const xAxis = d3.axisBottom(x).ticks(12).tickFormat(d3.timeFormat("%b %d"));
-        svg.append("g").attr("transform", `translate(0,${height})`).call(xAxis);
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(filteredData, (d) => d.Close * investmentAmount / 100)])
+            .domain([
+                0,
+                d3.max(Object.values(filteredData).flatMap(d => d.cumulativeInvestment))
+            ])
             .range([height, 0]);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(12));
 
         svg.append("g").call(d3.axisLeft(y));
 
-        groupedData.forEach(([day, data], i) => {
+        const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+        Object.entries(filteredData).forEach(([day, { cumulativeInvestment, values }], i) => {
+            const line = d3
+                .line()
+                .x((_, idx) => x(new Date(values[idx].date)))
+                .y((d) => y(d));
+
             svg.append("path")
-                .datum(data)
+                .datum(cumulativeInvestment)
                 .attr("fill", "none")
-                .attr("stroke", colorScale(day))
+                .attr("stroke", colors(day))
                 .attr("stroke-width", 2)
-                .attr(
-                    "d",
-                    d3
-                        .line()
-                        .x((d) => x(new Date(d.Date)))
-                        .y((d) => y(d.WeeklyInvestment))
-                );
-        });
+                .attr("d", line);
 
-        const hoverLine = svg
-            .append("line")
-            .attr("stroke", "gray")
-            .attr("stroke-dasharray", "4")
-            .attr("opacity", 0)
-            .attr("y1", 0)
-            .attr("y2", height);
-
-        svg.append("rect")
-            .attr("width", width)
-            .attr("height", height)
-            .attr("fill", "transparent")
-            .on("mousemove", (event) => {
-                const [mouseX] = d3.pointer(event);
-                const hoverDate = x.invert(mouseX);
-                hoverLine.attr("x1", mouseX).attr("x2", mouseX).attr("opacity", 1);
-            })
-            .on("mouseout", () => hoverLine.attr("opacity", 0));
-
-        // Add legend
-        const legend = svg
-            .append("g")
-            .attr("transform", `translate(0,${height + 30})`);
-
-        days.forEach((day, i) => {
-            legend
-                .append("circle")
-                .attr("cx", i * 100 + 10)
-                .attr("cy", 10)
+            // Legend
+            svg.append("circle")
+                .attr("cx", width + 10)
+                .attr("cy", i * 20)
                 .attr("r", 5)
-                .style("fill", colorScale(day));
+                .style("fill", colors(day));
 
-            legend
-                .append("text")
-                .attr("x", i * 100 + 20)
-                .attr("y", 15)
+            svg.append("text")
+                .attr("x", width + 20)
+                .attr("y", i * 20 + 5)
                 .text(day)
-                .style("font-size", "12px");
+                .style("font-size", "12px")
+                .style("fill", colors(day));
         });
     }
 </script>
