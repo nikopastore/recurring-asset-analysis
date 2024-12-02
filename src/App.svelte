@@ -35,18 +35,20 @@
 
     // Fetch data
     onMount(async () => {
-        try {
-            const response = await fetch("./normalized_prices.json");
-            if (!response.ok) throw new Error("Failed to fetch data");
-            assetData = await response.json();
-            updateFilteredData();
-        } catch (error) {
-            errorMessage = `Error loading data: ${error.message}`;
-            console.error(errorMessage);
-        } finally {
-            loading = false;
-        }
-    });
+    try {
+        const response = await fetch("/normalized_prices.json");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        assetData = await response.json();
+        console.log("Data successfully loaded:", assetData); // Debugging line
+        updateFilteredData();
+    } catch (error) {
+        errorMessage = `Error loading data: ${error.message}`;
+        console.error(errorMessage);
+    } finally {
+        loading = false;
+    }
+});
+
 
     // Update filtered data dynamically
     $: updateFilteredData();
