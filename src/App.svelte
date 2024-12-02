@@ -36,7 +36,7 @@
     // Fetch data
     onMount(async () => {
     try {
-        const response = await fetch("/normalized_prices.json");
+        const response = await fetch("/normalized_prices_with_days.json");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         assetData = await response.json();
         console.log("Data successfully loaded:", assetData); // Debugging line
