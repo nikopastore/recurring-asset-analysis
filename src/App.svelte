@@ -13,7 +13,7 @@
         { label: "Past 10 Years", months: 120 },
         { label: "Past 25 Years", months: 300 },
     ];
-    let selectedTimeFrame = timeFrames[2];
+    let selectedTimeFrame = timeFrames[2]; // Default: 1 Year
     let investmentAmount = 100;
 
     const assetDescriptions = {
@@ -73,12 +73,86 @@
 </script>
 
 <style>
-    /* Styling remains unchanged */
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    .container {
+        text-align: center;
+        margin: 20px auto;
+        max-width: 800px;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    .filter-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    select,
+    input {
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .time-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .time-buttons button {
+        padding: 10px 15px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .time-buttons button:hover {
+        background: #007acc;
+        color: white;
+    }
+
+    .time-buttons button.active {
+        background: #007acc;
+        color: white;
+        font-weight: bold;
+    }
+
+    .description {
+        font-style: italic;
+        margin: 20px 0;
+    }
+
+    .error {
+        color: red;
+        margin: 20px 0;
+    }
+
+    .chart-container {
+        margin-top: 20px;
+    }
 </style>
 
 <div class="container">
     <h1>Recurring Asset Analysis</h1>
 
+    <!-- Filters -->
     <div class="filter-container">
         <div>
             <label for="asset-select">Select Asset:</label>
@@ -99,16 +173,16 @@
                 </button>
             {/each}
         </div>
-    </div>
 
-    <div class="investment-input">
-        <label for="investment-amount">Weekly Investment ($):</label>
-        <input
-            id="investment-amount"
-            type="number"
-            bind:value={investmentAmount}
-            min="1"
-        />
+        <div>
+            <label for="investment-amount">Weekly Investment ($):</label>
+            <input
+                id="investment-amount"
+                type="number"
+                bind:value={investmentAmount}
+                min="1"
+            />
+        </div>
     </div>
 
     <div class="description">
