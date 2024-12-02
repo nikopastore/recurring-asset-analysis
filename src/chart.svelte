@@ -2,20 +2,20 @@
     import * as d3 from "d3";
 
     export let filteredData = [];
-    export let investmentAmount;
+    export let investmentAmount = 10; // Default investment amount
 
     let chart;
 
-    // Draw the chart when data changes
+    // Re-draw chart whenever filteredData changes
     $: if (filteredData.length) {
-        console.log("Drawing chart with data:", filteredData);
+        console.log("Filtered Data:", filteredData);
         drawChart();
     }
 
     function drawChart() {
         d3.select(chart).selectAll("*").remove(); // Clear existing chart
 
-        const margin = { top: 20, right: 20, bottom: 60, left: 50 };
+        const margin = { top: 20, right: 20, bottom: 60, left: 60 };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
@@ -28,7 +28,10 @@
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
         const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-        const colors = d3.scaleOrdinal(d3.schemeCategory10);
+        const colors = d3.scaleOrdinal(d3.schemeCategory10).domain(daysOfWeek);
+
+        // Group data by day of the week
+        const groupedData = d3.group(filteredData, (d) => d.Day);
 
         // Create scales
         const x = d3
@@ -38,30 +41,36 @@
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(filteredData, (d) => d3.max(d.values, (v) => v.value))])
+            .domain([
+                0,
+                d3.max(groupedData, ([, values]) =>
+                    d3.sum(values.map((d, i) => investmentAmount * (i + 1)))
+                ),
+            ])
             .range([height, 0]);
 
         // Add axes
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(12));
         svg.append("g").call(d3.axisLeft(y));
 
-        // Draw lines for each day of the week
-        daysOfWeek.forEach((day, i) => {
-            const line = d3
-                .line()
-                .x((d) => x(new Date(d.Date)))
-                .y((d) => y(d.values[i]?.value || 0)); // Use 0 if no value for this day
+        // Create a line generator
+        const lineGenerator = d3
+            .line()
+            .x((d) => x(new Date(d.Date)))
+            .y((d, i) => y(investmentAmount * (i + 1))); // Accumulate investments
 
+        // Draw lines for each day
+        groupedData.forEach((data, day) => {
             svg.append("path")
-                .datum(filteredData)
+                .datum(data)
                 .attr("fill", "none")
                 .attr("stroke", colors(day))
                 .attr("stroke-width", 1.5)
-                .attr("d", line);
+                .attr("d", lineGenerator);
         });
 
-        // Add hover feature
-        const hoverLine = svg.append("line").style("stroke", "gray").style("stroke-width", 1).style("opacity", 0);
+        // Add hover effect
+        const hoverLine = svg.append("line").attr("stroke", "gray").attr("stroke-width", 1).style("opacity", 0);
 
         const hoverBox = d3.select(chart).append("div").attr("class", "hover-box").style("opacity", 0);
 
@@ -76,16 +85,18 @@
                 .attr("y2", height)
                 .style("opacity", 1);
 
+            const hoverData = daysOfWeek.map((day) => {
+                const dataForDay = groupedData.get(day)?.find((d) => d.Date === d3.timeFormat("%Y-%m-%d")(hoveredDate));
+                return { day, value: dataForDay ? investmentAmount * (dataForDay.index + 1) : 0 };
+            });
+
             hoverBox
                 .style("opacity", 1)
                 .style("left", `${event.pageX + 15}px`)
                 .style("top", `${event.pageY - 50}px`)
                 .html(
-                    daysOfWeek
-                        .map((day, i) => {
-                            const value = filteredData.find((d) => new Date(d.Date).getTime() === hoveredDate.getTime())?.values[i]?.value || 0;
-                            return `<div><strong>${day}:</strong> $${value.toFixed(2)}</div>`;
-                        })
+                    hoverData
+                        .map((d) => `<div><strong>${d.day}:</strong> $${d.value.toFixed(2)}</div>`)
                         .join("")
                 );
         });
@@ -96,7 +107,7 @@
         });
 
         // Add legend
-        const legend = svg.append("g").attr("transform", `translate(0,${height + 20})`);
+        const legend = svg.append("g").attr("transform", `translate(0,${height + 30})`);
         daysOfWeek.forEach((day, i) => {
             legend
                 .append("circle")
