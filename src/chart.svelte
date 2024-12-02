@@ -6,12 +6,14 @@
 
     let chart;
 
+    // Draw the chart when data changes
     $: if (filteredData.length) {
+        console.log("Drawing chart with data:", filteredData);
         drawChart();
     }
 
     function drawChart() {
-        d3.select(chart).selectAll("*").remove();
+        d3.select(chart).selectAll("*").remove(); // Clear existing chart
 
         const margin = { top: 20, right: 20, bottom: 60, left: 50 };
         const width = 800 - margin.left - margin.right;
@@ -28,6 +30,7 @@
         const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
+        // Create scales
         const x = d3
             .scaleTime()
             .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
@@ -35,18 +38,19 @@
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(filteredData, (d) => d.values.reduce((sum, v) => sum + v.value, 0))])
+            .domain([0, d3.max(filteredData, (d) => d3.max(d.values, (v) => v.value))])
             .range([height, 0]);
 
+        // Add axes
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(12));
-
         svg.append("g").call(d3.axisLeft(y));
 
+        // Draw lines for each day of the week
         daysOfWeek.forEach((day, i) => {
             const line = d3
                 .line()
                 .x((d) => x(new Date(d.Date)))
-                .y((d) => y(d.values[i].value));
+                .y((d) => y(d.values[i]?.value || 0)); // Use 0 if no value for this day
 
             svg.append("path")
                 .datum(filteredData)
@@ -56,7 +60,7 @@
                 .attr("d", line);
         });
 
-        // Add hover effect
+        // Add hover feature
         const hoverLine = svg.append("line").style("stroke", "gray").style("stroke-width", 1).style("opacity", 0);
 
         const hoverBox = d3.select(chart).append("div").attr("class", "hover-box").style("opacity", 0);
