@@ -1,12 +1,15 @@
 <script>
     import * as d3 from "d3";
     export let filteredData = [];
-    export let investmentAmount;
+    export let investmentAmount = 10;
 
     let chart;
 
-    $: if (filteredData.length) {
-        drawChart();
+    $: {
+        console.log("Filtered Data in Chart:", filteredData);
+        if (filteredData.length) {
+            drawChart();
+        }
     }
 
     function drawChart() {
@@ -24,6 +27,7 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
+        // Scales
         const x = d3
             .scaleTime()
             .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
@@ -34,60 +38,89 @@
             .domain([0, d3.max(filteredData, (d) => d.Close * investmentAmount)])
             .range([height, 0]);
 
+        // Axes
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(12).tickFormat(d3.timeFormat("%B")));
-
         svg.append("g").call(d3.axisLeft(y));
 
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        // Color scheme for days
         const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-        days.forEach((day) => {
-            const dayData = filteredData.filter((d) => d.Day === day);
+        // Debugging: Display only Monday's data
+        const mondayData = filteredData.filter((d) => d.Day === "Monday");
 
-            const cumulativeData = [];
-            let cumulativeInvestment = 0;
-
-            dayData.forEach((d) => {
-                cumulativeInvestment += investmentAmount;
-                cumulativeData.push({ Date: d.Date, Value: cumulativeInvestment });
-            });
-
-            svg
-                .append("path")
-                .datum(cumulativeData)
-                .attr("fill", "none")
-                .attr("stroke", color(day))
-                .attr("stroke-width", 2)
-                .attr(
-                    "d",
-                    d3
-                        .line()
-                        .x((d) => x(new Date(d.Date)))
-                        .y((d) => y(d.Value))
-                );
+        // Calculate cumulative investment
+        const cumulativeData = [];
+        let cumulativeInvestment = 0;
+        mondayData.forEach((d) => {
+            cumulativeInvestment += investmentAmount;
+            cumulativeData.push({ Date: d.Date, Value: cumulativeInvestment });
         });
 
-        // Legend
-        const legend = svg
-            .append("g")
-            .attr("transform", `translate(0, ${height + 30})`)
-            .selectAll("g")
-            .data(days)
-            .enter()
-            .append("g")
-            .attr("transform", (d, i) => `translate(${i * 150}, 0)`);
+        console.log("Cumulative Data for Monday:", cumulativeData);
 
-        legend
-            .append("circle")
-            .attr("r", 5)
-            .attr("fill", (d) => color(d));
+        // Add line for Monday
+        svg
+            .append("path")
+            .datum(cumulativeData)
+            .attr("fill", "none")
+            .attr("stroke", color("Monday"))
+            .attr("stroke-width", 2)
+            .attr(
+                "d",
+                d3
+                    .line()
+                    .x((d) => x(new Date(d.Date)))
+                    .y((d) => y(d.Value))
+            );
 
-        legend
-            .append("text")
-            .text((d) => d)
-            .attr("x", 10)
-            .attr("y", 5);
+        // Hover feature
+        const focus = svg.append("g").style("display", "none");
+
+        focus.append("line").attr("class", "hover-line").attr("y1", 0).attr("y2", height).style("stroke", "black").style("stroke-width", 1);
+
+        const tooltip = d3.select(chart).append("div").attr("class", "tooltip").style("opacity", 0);
+
+        svg
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .on("mouseover", () => {
+                focus.style("display", null);
+                tooltip.style("opacity", 1);
+            })
+            .on("mousemove", (event) => {
+                const bisectDate = d3.bisector((d) => new Date(d.Date)).left;
+                const x0 = x.invert(d3.pointer(event)[0]);
+                const i = bisectDate(cumulativeData, x0, 1);
+                const d0 = cumulativeData[i - 1];
+                const d1 = cumulativeData[i];
+                const d = x0 - new Date(d0.Date) > new Date(d1.Date) - x0 ? d1 : d0;
+
+                focus.attr("transform", `translate(${x(new Date(d.Date))},0)`);
+                tooltip
+                    .html(`<strong>${d.Date}</strong><br>Value: $${d.Value.toFixed(2)}`)
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 10}px`);
+            })
+            .on("mouseout", () => {
+                focus.style("display", "none");
+                tooltip.style("opacity", 0);
+            });
     }
 </script>
 
 <div bind:this={chart}></div>
+
+<style>
+    .tooltip {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 4px;
+        pointer-events: none;
+        font-size: 12px;
+    }
+</style>
