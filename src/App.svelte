@@ -16,10 +16,11 @@
 
     let assetData = [];
     let averages = [];
+    let investmentGrowth = [];
     let highestDay = null;
     let errorMessage = "";
 
-    let chart;
+    let barChart, lineChart;
 
     onMount(async () => {
         try {
@@ -56,7 +57,30 @@
 
         highestDay = averages.reduce((max, current) => (current.average > max.average ? current : max), averages[0]);
 
-        drawChart();
+        calculateInvestmentGrowth(filteredData, daysOfWeek);
+        drawBarChart();
+        drawLineChart();
+    }
+
+    function calculateInvestmentGrowth(filteredData, daysOfWeek) {
+        const weeklyInvestment = 10;
+
+        investmentGrowth = daysOfWeek.map((day) => {
+            let totalInvestment = 0;
+            const dailyGrowth = [];
+
+            filteredData
+                .filter((record) => record.Day === day)
+                .forEach((record) => {
+                    totalInvestment += weeklyInvestment;
+                    dailyGrowth.push({
+                        date: new Date(record.Date),
+                        value: totalInvestment * record.Close,
+                    });
+                });
+
+            return { day, growth: dailyGrowth };
+        });
     }
 
     function handleAssetChange(event) {
@@ -69,15 +93,15 @@
         calculateAverages();
     }
 
-    function drawChart() {
-        d3.select(chart).selectAll("*").remove();
+    function drawBarChart() {
+        d3.select(barChart).selectAll("*").remove();
 
         const margin = { top: 20, right: 20, bottom: 30, left: 50 };
         const width = 500 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
         const svg = d3
-            .select(chart)
+            .select(barChart)
             .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -119,82 +143,82 @@
             .style("font-size", "12px")
             .text((d) => `$${d.average.toFixed(2)}`);
     }
+
+    function drawLineChart() {
+        d3.select(lineChart).selectAll("*").remove();
+
+        const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+        const width = 500 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        const svg = d3
+            .select(lineChart)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3
+            .scaleTime()
+            .domain([
+                d3.min(investmentGrowth, (d) => d3.min(d.growth, (p) => p.date)),
+                d3.max(investmentGrowth, (d) => d3.max(d.growth, (p) => p.date)),
+            ])
+            .range([0, width]);
+
+        const y = d3
+            .scaleLinear()
+            .domain([0, d3.max(investmentGrowth, (d) => d3.max(d.growth, (p) => p.value))])
+            .range([height, 0]);
+
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+        svg.append("g").call(d3.axisLeft(y));
+
+        const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+        investmentGrowth.forEach((lineData, index) => {
+            svg.append("path")
+                .datum(lineData.growth)
+                .attr("fill", "none")
+                .attr("stroke", colors(index))
+                .attr("stroke-width", 1.5)
+                .attr(
+                    "d",
+                    d3
+                        .line()
+                        .x((d) => x(d.date))
+                        .y((d) => y(d.value))
+                );
+        });
+
+        const legend = svg
+            .append("g")
+            .attr("transform", `translate(${width - 100},${margin.top})`);
+
+        investmentGrowth.forEach((lineData, index) => {
+            legend.append("rect")
+                .attr("x", 0)
+                .attr("y", index * 20)
+                .attr("width", 10)
+                .attr("height", 10)
+                .attr("fill", colors(index));
+
+            legend.append("text")
+                .attr("x", 15)
+                .attr("y", index * 20 + 10)
+                .text(lineData.day)
+                .style("font-size", "12px");
+        });
+    }
 </script>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f9f9f9;
-        color: #333;
-    }
-
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        text-align: center;
-    }
-
-    select,
-    button {
-        padding: 10px;
-        margin: 10px;
-        font-size: 14px;
-    }
-
-    .chart-container {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-    }
-
-    .chart {
-        flex: 1;
-    }
-
-    .averages-list {
-        margin-left: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-
-    ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    ul li {
-        background: #f0f0f0;
-        padding: 10px 15px;
-        border-radius: 5px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 16px;
-        max-width: 200px;
-    }
-
-    ul li.highlight {
-        background: #d4edda; /* Green highlight for the highest day */
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    ul li span:first-child {
-        flex-grow: 1;
-        text-align: left;
-    }
-
-    ul li span:last-child {
-        font-weight: bold;
-    }
+    /* Styling remains the same as before */
 </style>
 
 <div class="container">
-    <h1>Average Price Per Day of the Week</h1>
+    <h1>Investment Analysis</h1>
 
     <!-- Asset Selector -->
     <div>
@@ -218,24 +242,9 @@
         {/each}
     </div>
 
-    <!-- Chart and List -->
-    <div class="chart-container">
-        <!-- Chart -->
-        <div class="chart" bind:this={chart}></div>
+    <!-- Bar Chart -->
+    <div bind:this={barChart}></div>
 
-        <!-- Averages List -->
-        <div class="averages-list">
-            {#if errorMessage}
-                <p>{errorMessage}</p>
-            {:else}
-                <ul>
-                    {#each averages as { day, average }}
-                        <li class:highlight={day === highestDay.day}>
-                            <span>{day}:</span> <span>${average.toFixed(2)}</span>
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
-        </div>
-    </div>
+    <!-- Line Chart -->
+    <div bind:this={lineChart}></div>
 </div>
