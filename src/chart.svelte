@@ -1,18 +1,18 @@
 <script>
     import * as d3 from "d3";
     export let filteredData = [];
+    export let investmentAmount;
 
     let chart;
 
     $: if (filteredData.length) {
-        console.log("Filtered Data for Chart:", filteredData);
         drawChart();
     }
 
     function drawChart() {
-        d3.select(chart).selectAll("*").remove(); // Clear previous chart
+        d3.select(chart).selectAll("*").remove();
 
-        const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+        const margin = { top: 20, right: 30, bottom: 50, left: 50 };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
@@ -24,7 +24,6 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Define scales
         const x = d3
             .scaleTime()
             .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
@@ -32,55 +31,62 @@
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(filteredData, (d) => d.Investment)])
+            .domain([0, d3.max(filteredData, (d) => d.Close * investmentAmount)])
             .range([height, 0]);
 
-        // Draw axes
-        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(12));
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(12).tickFormat(d3.timeFormat("%B")));
+
         svg.append("g").call(d3.axisLeft(y));
 
-        // Define colors for days
-        const dayColors = d3.scaleOrdinal(d3.schemeCategory10).domain(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-        // Group data by day of the week
-        const groupedData = d3.group(filteredData, (d) => d.Day);
+        days.forEach((day) => {
+            const dayData = filteredData.filter((d) => d.Day === day);
 
-        // Draw a line for each day
-        for (const [day, data] of groupedData) {
-            svg.append("path")
-                .datum(data)
+            const cumulativeData = [];
+            let cumulativeInvestment = 0;
+
+            dayData.forEach((d) => {
+                cumulativeInvestment += investmentAmount;
+                cumulativeData.push({ Date: d.Date, Value: cumulativeInvestment });
+            });
+
+            svg
+                .append("path")
+                .datum(cumulativeData)
                 .attr("fill", "none")
-                .attr("stroke", dayColors(day))
+                .attr("stroke", color(day))
                 .attr("stroke-width", 2)
                 .attr(
                     "d",
                     d3
                         .line()
                         .x((d) => x(new Date(d.Date)))
-                        .y((d) => y(d.Investment))
+                        .y((d) => y(d.Value))
                 );
-        }
+        });
 
-        // Add legend
+        // Legend
         const legend = svg
             .append("g")
-            .attr("transform", `translate(0, ${height + 40})`); // Position below the chart
+            .attr("transform", `translate(0, ${height + 30})`)
+            .selectAll("g")
+            .data(days)
+            .enter()
+            .append("g")
+            .attr("transform", (d, i) => `translate(${i * 150}, 0)`);
 
-        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].forEach((day, i) => {
-            legend
-                .append("circle")
-                .attr("cx", i * 100)
-                .attr("cy", 0)
-                .attr("r", 5)
-                .style("fill", dayColors(day));
+        legend
+            .append("circle")
+            .attr("r", 5)
+            .attr("fill", (d) => color(d));
 
-            legend
-                .append("text")
-                .attr("x", i * 100 + 10)
-                .attr("y", 5)
-                .text(day)
-                .attr("alignment-baseline", "middle");
-        });
+        legend
+            .append("text")
+            .text((d) => d)
+            .attr("x", 10)
+            .attr("y", 5);
     }
 </script>
 
