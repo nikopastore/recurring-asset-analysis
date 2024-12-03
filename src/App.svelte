@@ -91,8 +91,9 @@
             .range([0, width])
             .padding(0.2);
 
-        const minY = d3.min(averages, (d) => d.average) * 0.95; // Start Y-axis slightly below minimum value
-        const maxY = d3.max(averages, (d) => d.average) * 1.05; // End Y-axis slightly above maximum value
+        // Adjust Y-axis to highlight only the tops of bars
+        const minY = d3.min(averages, (d) => d.average) * 0.98;
+        const maxY = d3.max(averages, (d) => d.average) * 1.02;
 
         const y = d3.scaleLinear().domain([minY, maxY]).range([height, 0]);
 
@@ -102,7 +103,7 @@
             .call(d3.axisBottom(x));
 
         // Y Axis
-        svg.append("g").call(d3.axisLeft(y));
+        svg.append("g").call(d3.axisLeft(y).ticks(3)); // Reduced ticks for clarity
 
         // Bars
         svg.selectAll(".bar")
@@ -124,6 +125,7 @@
             .attr("x", (d) => x(d.day) + x.bandwidth() / 2)
             .attr("y", (d) => y(d.average) - 5)
             .attr("text-anchor", "middle")
+            .style("font-size", "12px")
             .text((d) => `$${d.average.toFixed(2)}`);
     }
 </script>
@@ -142,7 +144,8 @@
         text-align: center;
     }
 
-    select, button {
+    select,
+    button {
         padding: 10px;
         margin: 10px;
         font-size: 14px;
@@ -155,21 +158,26 @@
     ul {
         list-style: none;
         padding: 0;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     ul li {
         background: #f0f0f0;
         padding: 10px;
-        margin: 5px 0;
         border-radius: 5px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-size: 16px;
     }
 
     ul li.highlight {
         background: #d4edda; /* Green highlight for the highest day */
         font-weight: bold;
+        font-size: 18px;
     }
 </style>
 
