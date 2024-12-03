@@ -74,7 +74,7 @@
         d3.select(chart).selectAll("*").remove(); // Clear previous chart
 
         const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-        const width = 600 - margin.left - margin.right;
+        const width = 500 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
 
         const svg = d3
@@ -137,7 +137,7 @@
     }
 
     .container {
-        max-width: 600px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 20px;
         text-align: center;
@@ -151,17 +151,27 @@
     }
 
     .chart-container {
+        display: flex;
+        justify-content: space-between;
         margin-top: 20px;
+    }
+
+    .chart {
+        flex: 1;
+    }
+
+    .averages-list {
+        margin-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
     }
 
     ul {
         list-style: none;
         padding: 0;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
+        margin: 0;
     }
 
     ul li {
@@ -172,7 +182,7 @@
         justify-content: space-between;
         align-items: center;
         font-size: 16px;
-        max-width: 300px; /* Narrower box */
+        max-width: 200px; /* Narrower box */
     }
 
     ul li.highlight {
@@ -216,19 +226,24 @@
         {/each}
     </div>
 
-    <!-- Error or Averages List -->
-    {#if errorMessage}
-        <p>{errorMessage}</p>
-    {:else}
-        <ul>
-            {#each averages as { day, average }}
-                <li class:highlight={day === highestDay.day}>
-                    <span>{day}:</span> <span>${average.toFixed(2)}</span> {day === highestDay.day ? "⭐" : ""}
-                </li>
-            {/each}
-        </ul>
-    {/if}
+    <!-- Chart and List -->
+    <div class="chart-container">
+        <!-- Chart -->
+        <div class="chart" bind:this={chart}></div>
 
-    <!-- Chart -->
-    <div class="chart-container" bind:this={chart}></div>
+        <!-- Averages List -->
+        <div class="averages-list">
+            {#if errorMessage}
+                <p>{errorMessage}</p>
+            {:else}
+                <ul>
+                    {#each averages as { day, average }}
+                        <li class:highlight={day === highestDay.day}>
+                            <span>{day}:</span> <span>${average.toFixed(2)}</span> {day === highestDay.day ? "⭐" : ""}
+                        </li>
+                    {/each}
+                </ul>
+            {/if}
+        </div>
+    </div>
 </div>
