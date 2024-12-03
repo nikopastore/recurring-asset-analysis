@@ -16,6 +16,7 @@
 
     let assetData = [];
     let averages = [];
+    let highestDay = null;
     let errorMessage = "";
 
     let chart; // Reference to the chart container
@@ -53,6 +54,9 @@
             return { day, average: parseFloat(average.toFixed(2)) };
         });
 
+        // Determine the highest day
+        highestDay = averages.reduce((max, current) => (current.average > max.average ? current : max), averages[0]);
+
         drawChart();
     }
 
@@ -87,10 +91,10 @@
             .range([0, width])
             .padding(0.2);
 
-        const y = d3
-            .scaleLinear()
-            .domain([0, d3.max(averages, (d) => d.average)])
-            .range([height, 0]);
+        const minY = d3.min(averages, (d) => d.average) * 0.95; // Start Y-axis slightly below minimum value
+        const maxY = d3.max(averages, (d) => d.average) * 1.05; // End Y-axis slightly above maximum value
+
+        const y = d3.scaleLinear().domain([minY, maxY]).range([height, 0]);
 
         // X Axis
         svg.append("g")
@@ -110,7 +114,7 @@
             .attr("y", (d) => y(d.average))
             .attr("width", x.bandwidth())
             .attr("height", (d) => height - y(d.average))
-            .attr("fill", "steelblue");
+            .attr("fill", (d) => (d.day === highestDay.day ? "green" : "steelblue"));
 
         // Add labels to bars
         svg.selectAll(".label")
@@ -147,6 +151,26 @@
     .chart-container {
         margin-top: 20px;
     }
+
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    ul li {
+        background: #f0f0f0;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    ul li.highlight {
+        background: #d4edda; /* Green highlight for the highest day */
+        font-weight: bold;
+    }
 </style>
 
 <div class="container">
@@ -180,7 +204,9 @@
     {:else}
         <ul>
             {#each averages as { day, average }}
-                <li><strong>{day}:</strong> ${average}</li>
+                <li class:highlight={day === highestDay.day}>
+                    <span>{day}:</span> <span>${average}</span> {day === highestDay.day ? "⭐" : ""}
+                </li>
             {/each}
         </ul>
     {/if}
