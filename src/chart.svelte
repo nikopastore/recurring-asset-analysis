@@ -42,7 +42,7 @@
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
         svg.append("g").call(d3.axisLeft(y));
 
-        // Line path for Monday (for debugging)
+        // Line path for Monday
         const mondayData = filteredData.filter((d) => d.Day === "Monday");
 
         let cumulativeInvestment = 0;
@@ -50,8 +50,6 @@
             cumulativeInvestment += investmentAmount;
             return { Date: d.Date, Value: cumulativeInvestment };
         });
-
-        console.log("Monday Cumulative Data:", cumulativeData);
 
         svg
             .append("path")
