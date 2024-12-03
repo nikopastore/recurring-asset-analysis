@@ -91,7 +91,6 @@
             .range([0, width])
             .padding(0.2);
 
-        // Adjust Y-axis to highlight only the tops of bars
         const minY = d3.min(averages, (d) => d.average) * 0.98;
         const maxY = d3.max(averages, (d) => d.average) * 1.02;
 
@@ -162,22 +161,33 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+        align-items: flex-start;
     }
 
     ul li {
         background: #f0f0f0;
-        padding: 10px;
+        padding: 10px 15px;
         border-radius: 5px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         font-size: 16px;
+        max-width: 300px; /* Narrower box */
     }
 
     ul li.highlight {
         background: #d4edda; /* Green highlight for the highest day */
         font-weight: bold;
         font-size: 18px;
+    }
+
+    ul li span:first-child {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    ul li span:last-child {
+        font-weight: bold;
     }
 </style>
 
@@ -213,7 +223,7 @@
         <ul>
             {#each averages as { day, average }}
                 <li class:highlight={day === highestDay.day}>
-                    <span>{day}:</span> <span>${average}</span> {day === highestDay.day ? "⭐" : ""}
+                    <span>{day}:</span> <span>${average.toFixed(2)}</span> {day === highestDay.day ? "⭐" : ""}
                 </li>
             {/each}
         </ul>
