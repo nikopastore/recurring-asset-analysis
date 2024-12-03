@@ -6,9 +6,9 @@
 
     let chart;
 
-    // Re-draw chart whenever filteredData changes
+    // Log filtered data for debugging
     $: if (filteredData.length) {
-        console.log("Filtered Data:", filteredData);
+        console.log("Filtered Data in Chart.svelte:", filteredData);
         drawChart();
     }
 
@@ -32,6 +32,7 @@
 
         // Group data by day of the week
         const groupedData = d3.group(filteredData, (d) => d.Day);
+        console.log("Grouped Data by Day:", groupedData);
 
         // Create scales
         const x = d3
@@ -41,12 +42,7 @@
 
         const y = d3
             .scaleLinear()
-            .domain([
-                0,
-                d3.max(groupedData, ([, values]) =>
-                    d3.sum(values.map((d, i) => investmentAmount * (i + 1)))
-                ),
-            ])
+            .domain([0, d3.max(filteredData, (d, i) => investmentAmount * (i + 1))])
             .range([height, 0]);
 
         // Add axes
