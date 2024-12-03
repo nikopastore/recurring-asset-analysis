@@ -1,95 +1,89 @@
 <script>
-    import Chart from "./Chart.svelte";
     import { onMount } from "svelte";
 
-    let assets = ["Gold", "SPY", "Bitcoin"];
-    let selectedAsset = "Gold";
+    // Data and state
+    let assetData = [];
+    let averages = [];
+    let errorMessage = "";
 
-    const assetDescriptions = {
-        Gold: "Gold is a precious metal often considered a hedge against inflation.",
-        SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
-        Bitcoin: "Bitcoin is a decentralized digital currency created in 2009.",
-    };
-
-    let filteredData = [];
-    const investmentAmount = 10;
-
-    let loading = true;
-
-    // Load data
+    // Fetch data on mount
     onMount(async () => {
         try {
             const response = await fetch("./normalized_prices_with_days.json");
+            if (!response.ok) throw new Error("Failed to fetch data");
             const data = await response.json();
 
-            console.log("Raw Data:", data);
-
-            const today = new Date();
-            const oneYearAgo = new Date(today);
-            oneYearAgo.setFullYear(today.getFullYear() - 1);
-
-            filteredData = data
-                .filter((d) => d.Asset === selectedAsset && new Date(d.Date) >= oneYearAgo)
-                .sort((a, b) => new Date(a.Date) - new Date(b.Date));
-
-            console.log("Filtered Data in App:", filteredData);
+            // Calculate averages
+            averages = calculateAverages(data);
         } catch (error) {
-            console.error("Error loading data:", error);
-        } finally {
-            loading = false;
+            errorMessage = `Error loading data: ${error.message}`;
+            console.error(errorMessage);
         }
     });
 
-    // Watch for asset selection changes
-    function handleAssetChange(event) {
-        selectedAsset = event.target.value;
-        console.log("Selected Asset:", selectedAsset);
+    function calculateAverages(data) {
+        const data2023 = data.filter((record) => {
+            const year = new Date(record.Date).getFullYear();
+            return year === 2023;
+        });
+
+        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        return daysOfWeek.map((day) => {
+            const dayData = data2023.filter((record) => record.Day === day);
+            const average =
+                dayData.reduce((sum, record) => sum + record.Close, 0) / dayData.length || 0;
+
+            return { day, average: average.toFixed(2) };
+        });
     }
 </script>
 
 <style>
     body {
-        margin: 0;
         font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
+        background: #f9f9f9;
         color: #333;
     }
 
-    main {
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
         text-align: center;
-        padding: 1rem;
     }
 
-    h1 {
-        margin-bottom: 1rem;
+    ul {
+        list-style-type: none;
+        padding: 0;
     }
 
-    .description {
-        margin-bottom: 1.5rem;
-        font-style: italic;
+    li {
+        padding: 10px;
+        background: #fff;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
     }
 
-    select {
-        padding: 0.5rem;
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
+    .error {
+        color: red;
     }
 </style>
 
-<main>
-    <h1>One Year Investment Analysis</h1>
+<div class="container">
+    <h1>Average Price Per Day of the Week (2023)</h1>
 
-    <select on:change={handleAssetChange}>
-        {#each assets as asset}
-            <option value={asset}>{asset}</option>
-        {/each}
-    </select>
-
-    <div class="description">{assetDescriptions[selectedAsset]}</div>
-
-    {#if loading}
+    {#if errorMessage}
+        <p class="error">{errorMessage}</p>
+    {:else if averages.length === 0}
         <p>Loading data...</p>
     {:else}
-        <Chart {filteredData} {investmentAmount} />
+        <ul>
+            {#each averages as { day, average }}
+                <li>
+                    <strong>{day}:</strong> ${average}
+                </li>
+            {/each}
+        </ul>
     {/if}
-</main>
+</div>
