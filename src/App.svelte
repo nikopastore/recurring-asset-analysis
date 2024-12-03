@@ -66,16 +66,20 @@
         const weeklyInvestment = 10;
 
         investmentGrowth = daysOfWeek.map((day) => {
-            let totalInvestment = 0;
+            let totalUnits = 0;
+            let totalValue = 0;
             const dailyGrowth = [];
 
             filteredData
                 .filter((record) => record.Day === day)
                 .forEach((record) => {
-                    totalInvestment += weeklyInvestment;
+                    const unitsPurchased = weeklyInvestment / record.Close;
+                    totalUnits += unitsPurchased;
+                    totalValue = totalUnits * record.Close;
+
                     dailyGrowth.push({
                         date: new Date(record.Date),
-                        value: totalInvestment * record.Close,
+                        value: totalValue,
                     });
                 });
 
@@ -214,16 +218,29 @@
 </script>
 
 <style>
-    /* Styling remains the same as before */
+    .charts-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .chart {
+        flex: 1 1 48%;
+        margin: 10px;
+    }
+
+    .title {
+        text-align: center;
+    }
 </style>
 
-<div class="container">
-    <h1>Investment Analysis</h1>
+<div>
+    <h1 class="title">Investment Analysis</h1>
 
-    <!-- Asset Selector -->
+    <!-- Asset Dropdown -->
     <div>
         <label for="asset-select">Select Asset:</label>
-        <select id="asset-select" bind:value={selectedAsset} on:change={handleAssetChange}>
+        <select id="asset-select" on:change={handleAssetChange}>
             {#each assets as asset}
                 <option value={asset}>{asset}</option>
             {/each}
@@ -242,9 +259,9 @@
         {/each}
     </div>
 
-    <!-- Bar Chart -->
-    <div bind:this={barChart}></div>
-
-    <!-- Line Chart -->
-    <div bind:this={lineChart}></div>
+    <!-- Charts -->
+    <div class="charts-container">
+        <div class="chart" bind:this={barChart}></div>
+        <div class="chart" bind:this={lineChart}></div>
+    </div>
 </div>
