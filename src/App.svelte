@@ -11,15 +11,18 @@
         Bitcoin: "Bitcoin is a decentralized digital currency created in 2009.",
     };
 
+    let filteredData = [];
     const investmentAmount = 10;
 
-    let filteredData = [];
     let loading = true;
 
+    // Load data
     onMount(async () => {
         try {
             const response = await fetch("./normalized_prices_with_days.json");
             const data = await response.json();
+
+            console.log("Raw Data:", data);
 
             const today = new Date();
             const oneYearAgo = new Date(today);
@@ -36,6 +39,12 @@
             loading = false;
         }
     });
+
+    // Watch for asset selection changes
+    function handleAssetChange(event) {
+        selectedAsset = event.target.value;
+        console.log("Selected Asset:", selectedAsset);
+    }
 </script>
 
 <style>
@@ -47,22 +56,34 @@
     }
 
     main {
-        padding: 1rem;
         text-align: center;
+        padding: 1rem;
     }
 
     h1 {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
 
     .description {
+        margin-bottom: 1.5rem;
         font-style: italic;
-        margin: 1rem 0;
+    }
+
+    select {
+        padding: 0.5rem;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
     }
 </style>
 
 <main>
     <h1>One Year Investment Analysis</h1>
+
+    <select on:change={handleAssetChange}>
+        {#each assets as asset}
+            <option value={asset}>{asset}</option>
+        {/each}
+    </select>
 
     <div class="description">{assetDescriptions[selectedAsset]}</div>
 
