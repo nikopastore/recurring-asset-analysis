@@ -1,9 +1,18 @@
 <script>
     import { onMount } from "svelte";
 
-    // Available assets
+    // Available assets and time frames
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
+
+    let timeFrames = [
+        { label: "1 Month", months: 1 },
+        { label: "3 Months", months: 3 },
+        { label: "6 Months", months: 6 },
+        { label: "1 Year", months: 12 },
+        { label: "5 Years", months: 60 },
+    ];
+    let selectedTimeFrame = timeFrames[3]; // Default to 1 Year
 
     // Data and state
     let assetData = [];
@@ -17,7 +26,7 @@
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
 
-            // Calculate averages for the default asset
+            // Calculate averages for the default asset and time frame
             calculateAverages();
         } catch (error) {
             errorMessage = `Error loading data: ${error.message}`;
@@ -25,18 +34,21 @@
         }
     });
 
-    // Calculate averages for the selected asset
+    // Calculate averages for the selected asset and time frame
     function calculateAverages() {
         if (!assetData || assetData.length === 0) return;
 
-        const data2023 = assetData.filter((record) => {
-            const year = new Date(record.Date).getFullYear();
-            return year === 2023 && record.Asset === selectedAsset;
+        const today = new Date();
+        const cutoffDate = new Date(today.setMonth(today.getMonth() - selectedTimeFrame.months));
+
+        const filteredData = assetData.filter((record) => {
+            const recordDate = new Date(record.Date);
+            return record.Asset === selectedAsset && recordDate >= cutoffDate;
         });
 
         const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         averages = daysOfWeek.map((day) => {
-            const dayData = data2023.filter((record) => record.Day === day);
+            const dayData = filteredData.filter((record) => record.Day === day);
             const average =
                 dayData.reduce((sum, record) => sum + record.Close, 0) / dayData.length || 0;
 
@@ -44,9 +56,14 @@
         });
     }
 
-    // Handle asset change
+    // Handle asset and time frame changes
     function handleAssetChange(event) {
         selectedAsset = event.target.value;
+        calculateAverages();
+    }
+
+    function handleTimeFrameChange(timeFrame) {
+        selectedTimeFrame = timeFrame;
         calculateAverages();
     }
 </script>
@@ -65,10 +82,33 @@
         text-align: center;
     }
 
-    select {
-        padding: 8px;
-        font-size: 16px;
-        margin-bottom: 20px;
+    .buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    button {
+        padding: 10px 15px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s, color 0.3s;
+    }
+
+    button:hover {
+        background: #007acc;
+        color: white;
+    }
+
+    button.active {
+        background: #007acc;
+        color: white;
+        font-weight: bold;
     }
 
     ul {
@@ -90,7 +130,7 @@
 </style>
 
 <div class="container">
-    <h1>Average Price Per Day of the Week (2023)</h1>
+    <h1>Average Price Per Day of the Week</h1>
 
     <!-- Asset Selector -->
     <div>
@@ -100,6 +140,18 @@
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
+    </div>
+
+    <!-- Time Frame Buttons -->
+    <div class="buttons-container">
+        {#each timeFrames as timeFrame}
+            <button
+                class:active={selectedTimeFrame === timeFrame}
+                on:click={() => handleTimeFrameChange(timeFrame)}
+            >
+                {timeFrame.label}
+            </button>
+        {/each}
     </div>
 
     <!-- Error Message -->
