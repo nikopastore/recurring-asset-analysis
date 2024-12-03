@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
+    import * as d3 from "d3";
 
-    // Available assets and time frames
     let assets = ["Gold", "SPY", "Bitcoin"];
     let selectedAsset = "Gold";
 
@@ -14,19 +14,18 @@
     ];
     let selectedTimeFrame = timeFrames[3]; // Default to 1 Year
 
-    // Data and state
     let assetData = [];
     let averages = [];
     let errorMessage = "";
 
-    // Fetch data on mount
+    let chart; // Reference to the chart container
+
     onMount(async () => {
         try {
             const response = await fetch("./normalized_prices_with_days.json");
             if (!response.ok) throw new Error("Failed to fetch data");
             assetData = await response.json();
 
-            // Calculate averages for the default asset and time frame
             calculateAverages();
         } catch (error) {
             errorMessage = `Error loading data: ${error.message}`;
@@ -34,7 +33,6 @@
         }
     });
 
-    // Calculate averages for the selected asset and time frame
     function calculateAverages() {
         if (!assetData || assetData.length === 0) return;
 
@@ -52,11 +50,12 @@
             const average =
                 dayData.reduce((sum, record) => sum + record.Close, 0) / dayData.length || 0;
 
-            return { day, average: average.toFixed(2) };
+            return { day, average: parseFloat(average.toFixed(2)) };
         });
+
+        drawChart();
     }
 
-    // Handle asset and time frame changes
     function handleAssetChange(event) {
         selectedAsset = event.target.value;
         calculateAverages();
@@ -65,6 +64,63 @@
     function handleTimeFrameChange(timeFrame) {
         selectedTimeFrame = timeFrame;
         calculateAverages();
+    }
+
+    function drawChart() {
+        d3.select(chart).selectAll("*").remove(); // Clear previous chart
+
+        const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+        const width = 600 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        const svg = d3
+            .select(chart)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3
+            .scaleBand()
+            .domain(averages.map((d) => d.day))
+            .range([0, width])
+            .padding(0.2);
+
+        const y = d3
+            .scaleLinear()
+            .domain([0, d3.max(averages, (d) => d.average)])
+            .range([height, 0]);
+
+        // X Axis
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x));
+
+        // Y Axis
+        svg.append("g").call(d3.axisLeft(y));
+
+        // Bars
+        svg.selectAll(".bar")
+            .data(averages)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", (d) => x(d.day))
+            .attr("y", (d) => y(d.average))
+            .attr("width", x.bandwidth())
+            .attr("height", (d) => height - y(d.average))
+            .attr("fill", "steelblue");
+
+        // Add labels to bars
+        svg.selectAll(".label")
+            .data(averages)
+            .enter()
+            .append("text")
+            .attr("x", (d) => x(d.day) + x.bandwidth() / 2)
+            .attr("y", (d) => y(d.average) - 5)
+            .attr("text-anchor", "middle")
+            .text((d) => `$${d.average.toFixed(2)}`);
     }
 </script>
 
@@ -82,50 +138,14 @@
         text-align: center;
     }
 
-    .buttons-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        margin-top: 10px;
-    }
-
-    button {
-        padding: 10px 15px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        background: #f5f5f5;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background 0.3s, color 0.3s;
-    }
-
-    button:hover {
-        background: #007acc;
-        color: white;
-    }
-
-    button.active {
-        background: #007acc;
-        color: white;
-        font-weight: bold;
-    }
-
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    li {
+    select, button {
         padding: 10px;
-        background: #fff;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
+        margin: 10px;
+        font-size: 14px;
     }
 
-    .error {
-        color: red;
+    .chart-container {
+        margin-top: 20px;
     }
 </style>
 
@@ -143,7 +163,7 @@
     </div>
 
     <!-- Time Frame Buttons -->
-    <div class="buttons-container">
+    <div>
         {#each timeFrames as timeFrame}
             <button
                 class:active={selectedTimeFrame === timeFrame}
@@ -154,19 +174,17 @@
         {/each}
     </div>
 
-    <!-- Error Message -->
+    <!-- Error or Averages List -->
     {#if errorMessage}
-        <p class="error">{errorMessage}</p>
-    {:else if averages.length === 0}
-        <p>Loading data...</p>
+        <p>{errorMessage}</p>
     {:else}
-        <!-- Averages List -->
         <ul>
             {#each averages as { day, average }}
-                <li>
-                    <strong>{day}:</strong> ${average}
-                </li>
+                <li><strong>{day}:</strong> ${average}</li>
             {/each}
         </ul>
     {/if}
+
+    <!-- Chart -->
+    <div class="chart-container" bind:this={chart}></div>
 </div>
