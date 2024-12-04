@@ -239,7 +239,12 @@
         align-items: center;
         text-align: center;
         gap: 20px;
+        width: 100%;
         max-width: 900px;
+    }
+
+    .charts {
+        margin-top: 20px;
     }
 
     select,
@@ -258,19 +263,15 @@
     button:hover {
         background-color: #0056b3;
     }
-
-    .charts {
-        margin-top: 20px;
-    }
 </style>
 
 <div class="container">
     <h1>Recurring Investment Analysis</h1>
     <p>
-        Recurring investments offer a hands-free way to grow your portfolio by automatically investing on a set schedule, eliminating the need to remember or manually manage your contributions. These visualizations are designed to help you analyze whether choosing a specific day of the week for your investments can lead to better growth over time. 
+        Recurring investments offer a hands-free way to grow your portfolio by automatically investing on a set schedule, eliminating the need to remember or manually manage your contributions. These visualizations are designed to help you analyze whether choosing a specific day of the week for your investments can lead to better growth over time.
     </p>
     <p>
-        You can explore three assets—Bitcoin, Gold, and SPY—to discover potential patterns. The bar chart displays the average price of your selected asset for each day of the week, helping you understand daily price trends. Below, the line chart illustrates the growth of a $10 recurring investment made on each day of the week, with each line representing a specific day. This allows you to compare the potential growth of your investments and determine the most advantageous day to invest automatically.
+        You can explore three assets—Bitcoin, Gold, and SPY—to discover potential patterns. The bar chart above displays the average price of your selected asset for each day of the week, helping you understand daily price trends. Below, the line chart illustrates the growth of a $10 recurring investment made on each day of the week, with each line representing a specific day. This allows you to compare the potential growth of your investments and determine the most advantageous day to invest automatically.
     </p>
 
     <div>
@@ -288,6 +289,6 @@
         {/each}
     </div>
 
-    <div bind:this={barChart}></div>
-    <div bind:this={lineChart}></div>
+    <div class="charts" bind:this={barChart}></div>
+    <div class="charts" bind:this={lineChart}></div>
 </div>
