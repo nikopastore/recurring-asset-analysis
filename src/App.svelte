@@ -225,12 +225,8 @@
 <style>
     body {
         margin: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f9f9f9;
         font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
     }
 
     .container {
@@ -239,29 +235,25 @@
         align-items: center;
         text-align: center;
         gap: 20px;
-        width: 100%;
-        max-width: 900px;
+        padding: 20px;
     }
 
-    .charts {
-        margin-top: 20px;
+    h1 {
+        font-size: 2rem;
+        font-weight: bold;
     }
 
-    select,
-    button {
-        padding: 10px 20px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
+    p {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: #555;
+        max-width: 800px;
+        margin: 0 auto;
     }
 
-    button {
-        background-color: #007bff;
-        color: white;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background-color: #0056b3;
+    .asset-description {
+        font-style: italic;
+        color: #666;
     }
 </style>
 
@@ -273,22 +265,12 @@
     <p>
         You can explore three assets—Bitcoin, Gold, and SPY—to discover potential patterns. The bar chart above displays the average price of your selected asset for each day of the week, helping you understand daily price trends. Below, the line chart illustrates the growth of a $10 recurring investment made on each day of the week, with each line representing a specific day. This allows you to compare the potential growth of your investments and determine the most advantageous day to invest automatically.
     </p>
-
     <div>
-        <select bind:value={selectedAsset} on:change={handleAssetChange}>
+        <select bind:value={selectedAsset}>
             {#each assets as asset}
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
-        <p>{assetDescriptions[selectedAsset]}</p>
+        <p class="asset-description">{assetDescriptions[selectedAsset]}</p>
     </div>
-
-    <div>
-        {#each timeFrames as frame}
-            <button on:click={() => handleTimeFrameChange(frame)}>{frame.label}</button>
-        {/each}
-    </div>
-
-    <div class="charts" bind:this={barChart}></div>
-    <div class="charts" bind:this={lineChart}></div>
 </div>
