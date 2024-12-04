@@ -222,7 +222,7 @@
     }
 </script>
 
-/* General Page Styling */
+<style>
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -368,6 +368,7 @@ body {
         flex-wrap: wrap;
     }
 }
+</style>
 
 <div>
     <!-- Page Title -->
