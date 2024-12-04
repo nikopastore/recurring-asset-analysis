@@ -1,66 +1,131 @@
 <script>
     import * as d3 from "d3";
 
-    export let filteredData = [];
-    export let investmentAmount = 10;
+    export let lineChartData = [];
+    export let barChartData = [];
+    export let timeFrame;
 
-    let chart;
+    let lineChartContainer;
 
-    $: {
-        console.log("Filtered Data in Chart:", filteredData);
-        if (filteredData.length) {
-            drawChart();
-        }
+    $: if (lineChartData.length) {
+        drawLineChart();
     }
 
-    function drawChart() {
-        console.log("Drawing Chart...");
+    function drawLineChart() {
+        // Clear the existing chart
+        d3.select(lineChartContainer).selectAll("*").remove();
 
-        // Remove previous chart content
-        d3.select(chart).selectAll("*").remove();
-
-        // Dimensions
-        const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-        const width = 800 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
+        const margin = { top: 20, right: 40, bottom: 30, left: 50 };
+        const width = 500 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
 
         const svg = d3
-            .select(chart)
+            .select(lineChartContainer)
             .append("svg")
             .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("height", height + margin.top + margin.bottom);
+
+        const g = svg
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Scales
-        const x = d3
+        // Set up scales
+        const xScale = d3
             .scaleTime()
-            .domain(d3.extent(filteredData, (d) => new Date(d.Date)))
+            .domain(d3.extent(lineChartData, (d) => new Date(d.Date)))
             .range([0, width]);
 
-        const y = d3
+        const yScale = d3
             .scaleLinear()
-            .domain([0, d3.max(filteredData, (d) => d.Close * investmentAmount)])
+            .domain([0, d3.max(lineChartData, (d) => d.Value) * 1.1])
             .range([height, 0]);
 
-        // Axes
-        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
-        svg.append("g").call(d3.axisLeft(y));
+        // X and Y axes
+        g.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale).ticks(12)); // 12 ticks for months
 
-        // Add Line
+        g.append("g").call(d3.axisLeft(yScale));
+
+        // Line generator
         const line = d3
             .line()
-            .x((d) => x(new Date(d.Date)))
-            .y((d) => y(d.Close * investmentAmount));
+            .x((d) => xScale(new Date(d.Date)))
+            .y((d) => yScale(d.Value));
 
-        svg
-            .append("path")
-            .datum(filteredData)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
+        // Color scale for days
+        const colorScale = d3
+            .scaleOrdinal()
+            .domain(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
+            .range(d3.schemeCategory10);
+
+        // Draw lines
+        const days = d3.group(lineChartData, (d) => d.Day);
+        for (const [day, data] of days) {
+            g.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", colorScale(day))
+                .attr("stroke-width", 2)
+                .attr("d", line);
+        }
+
+        // Hover elements
+        const hoverLine = g
+            .append("line")
+            .attr("stroke", "gray")
+            .attr("stroke-dasharray", "3,3")
+            .attr("y1", 0)
+            .attr("y2", height)
+            .style("opacity", 0);
+
+        const tooltip = d3
+            .select(lineChartContainer)
+            .append("div")
+            .style("position", "absolute")
+            .style("background", "#fff")
+            .style("border", "1px solid #ccc")
+            .style("padding", "5px")
+            .style("border-radius", "5px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+
+        // Add mouse interaction
+        svg.on("mousemove", (event) => {
+            const [mouseX] = d3.pointer(event);
+            const xDate = xScale.invert(mouseX - margin.left);
+
+            hoverLine
+                .attr("x1", xScale(xDate))
+                .attr("x2", xScale(xDate))
+                .style("opacity", 1);
+
+            const dataAtHover = [];
+            days.forEach((data, day) => {
+                const closest = d3.least(data, (d) =>
+                    Math.abs(new Date(d.Date) - xDate)
+                );
+                if (closest) {
+                    dataAtHover.push({ day, value: closest.Value });
+                }
+            });
+
+            tooltip
+                .html(
+                    dataAtHover
+                        .map((d) => `<strong>${d.day}:</strong> $${d.value.toFixed(2)}`)
+                        .join("<br>")
+                )
+                .style("left", `${event.pageX + 15}px`)
+                .style("top", `${event.pageY - 28}px`)
+                .style("opacity", 1);
+        });
+
+        svg.on("mouseout", () => {
+            hoverLine.style("opacity", 0);
+            tooltip.style("opacity", 0);
+        });
     }
 </script>
 
-<div bind:this={chart}></div>
+<div bind:this={lineChartContainer}></div>
