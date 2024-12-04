@@ -224,52 +224,60 @@
 
 <style>
     body {
+        margin: 0;
+        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        margin: 0;
-        font-family: Arial, sans-serif;
         background-color: #f9f9f9;
+        font-family: Arial, sans-serif;
     }
 
     .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         text-align: center;
-        width: 100%;
+        gap: 20px;
         max-width: 900px;
     }
 
-    .controls {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        margin-bottom: 20px;
+    select,
+    button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
     }
 
-    .charts {
-        margin-top: 20px;
+    button {
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #0056b3;
     }
 </style>
 
 <div class="container">
     <h1>Recurring Investment Analysis</h1>
-    <p>Analyze recurring investments and their long-term impact.</p>
+    <p>Analyze how recurring investments perform over time for selected assets and days of the week.</p>
 
-    <div class="controls">
+    <div>
         <select bind:value={selectedAsset} on:change={handleAssetChange}>
             {#each assets as asset}
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
-        <p>{assetDescriptions[selectedAsset]}</p>
-
-        <div>
-            {#each timeFrames as frame}
-                <button on:click={() => handleTimeFrameChange(frame)}>{frame.label}</button>
-            {/each}
-        </div>
     </div>
 
-    <div class="charts" bind:this={barChart}></div>
-    <div class="charts" bind:this={lineChart}></div>
+    <div>
+        {#each timeFrames as frame}
+            <button on:click={() => handleTimeFrameChange(frame)}>{frame.label}</button>
+        {/each}
+    </div>
+
+    <div bind:this={barChart}></div>
+    <div bind:this={lineChart}></div>
 </div>
