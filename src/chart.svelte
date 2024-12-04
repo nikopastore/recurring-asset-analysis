@@ -2,6 +2,9 @@
     import * as d3 from "d3";
 
     export let lineChartData = [];
+    export let barChartData = [];
+    export let timeFrame;
+
     let lineChartContainer;
 
     $: if (lineChartData.length) {
@@ -26,7 +29,7 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Scales
+        // Set up scales
         const xScale = d3
             .scaleTime()
             .domain(d3.extent(lineChartData, (d) => new Date(d.Date)))
@@ -40,7 +43,8 @@
         // X and Y axes
         g.append("g")
             .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(xScale).ticks(12));
+            .call(d3.axisBottom(xScale).ticks(12)); // 12 ticks for months
+
         g.append("g").call(d3.axisLeft(yScale));
 
         // Line generator
@@ -49,13 +53,14 @@
             .x((d) => xScale(new Date(d.Date)))
             .y((d) => yScale(d.Value));
 
-        // Draw lines
-        const days = d3.group(lineChartData, (d) => d.Day);
+        // Color scale for days
         const colorScale = d3
             .scaleOrdinal()
             .domain(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
             .range(d3.schemeCategory10);
 
+        // Draw lines
+        const days = d3.group(lineChartData, (d) => d.Day);
         for (const [day, data] of days) {
             g.append("path")
                 .datum(data)
@@ -65,7 +70,7 @@
                 .attr("d", line);
         }
 
-        // Hover Feature
+        // Hover elements
         const hoverLine = g
             .append("line")
             .attr("stroke", "gray")
@@ -85,6 +90,7 @@
             .style("pointer-events", "none")
             .style("opacity", 0);
 
+        // Add mouse interaction
         svg.on("mousemove", (event) => {
             const [mouseX] = d3.pointer(event);
             const xDate = xScale.invert(mouseX - margin.left);
@@ -94,19 +100,19 @@
                 .attr("x2", xScale(xDate))
                 .style("opacity", 1);
 
-            const hoverData = [];
+            const dataAtHover = [];
             days.forEach((data, day) => {
                 const closest = d3.least(data, (d) =>
                     Math.abs(new Date(d.Date) - xDate)
                 );
                 if (closest) {
-                    hoverData.push({ day, value: closest.Value });
+                    dataAtHover.push({ day, value: closest.Value });
                 }
             });
 
             tooltip
                 .html(
-                    hoverData
+                    dataAtHover
                         .map((d) => `<strong>${d.day}:</strong> $${d.value.toFixed(2)}`)
                         .join("<br>")
                 )
