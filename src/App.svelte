@@ -223,75 +223,88 @@
 </script>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f9f9f9;
-        color: #333;
-    }
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 100vh;
+    gap: 20px;
+}
 
-    .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        min-height: 100vh;
-        gap: 20px;
-    }
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
 
-    .controls {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
+select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
 
-    select {
-        padding: 10px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        outline: none;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
 
-    select:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
+.time-buttons {
+    display: flex;
+    gap: 10px;
+}
 
-    .time-buttons {
-        display: flex;
-        gap: 10px;
-    }
+.time-button {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
 
-    .time-button {
-        padding: 10px 20px;
-        font-size: 14px;
-        border-radius: 8px;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+.time-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
 
-    .time-button:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
+.time-button.selected {
+    background-color: #0056b3;
+    font-weight: bold;
+}
 
-    .time-button.selected {
-        background-color: #0056b3;
-        font-weight: bold;
-    }
+.charts {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.asset-description {
+    font-size: 1rem;
+    font-style: italic;
+    color: #666;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.error {
+    color: red;
+}
 </style>
 
 <div class="container">
-    <h1>Asset Analysis</h1>
-    <p>Analyze recurring investments and their impact on long-term growth.</p>
+    <h1>Recurring Investment Analysis</h1>
+    <p>Analyze how recurring investments perform over time, based on selected assets and days of the week.</p>
 
     <div class="controls">
         <select bind:value={selectedAsset} on:change={handleAssetChange}>
@@ -299,6 +312,7 @@
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
+        <p class="asset-description">{assetDescriptions[selectedAsset]}</p>
 
         <div class="time-buttons">
             {#each timeFrames as frame}
@@ -314,15 +328,15 @@
 
     <div>
         <h2>Average Closing Prices</h2>
-        <div bind:this={barChart}></div>
+        <div class="charts" bind:this={barChart}></div>
     </div>
 
     <div>
         <h2>Investment Growth</h2>
-        <div bind:this={lineChart}></div>
+        <div class="charts" bind:this={lineChart}></div>
     </div>
 
     {#if errorMessage}
-        <p>{errorMessage}</p>
+        <p class="error">{errorMessage}</p>
     {/if}
 </div>
