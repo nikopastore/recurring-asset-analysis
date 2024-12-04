@@ -14,6 +14,12 @@
     ];
     let selectedTimeFrame = timeFrames[3]; // Default to 1 Year
 
+    const assetDescriptions = {
+        Gold: "Gold is a precious metal often considered a hedge against inflation.",
+        SPY: "SPY is an ETF tracking the S&P 500 Index, a benchmark for US equities.",
+        Bitcoin: "Bitcoin is a decentralized digital currency created in 2009.",
+    };
+
     let assetData = [];
     let averages = [];
     let investmentGrowth = [];
@@ -216,59 +222,180 @@
     }
 </script>
 
-<style>
-    .app {
-        text-align: center;
-        font-family: Arial, sans-serif;
-    }
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
 
-    .dropdown {
-        margin: 10px 0;
-    }
+/* Page Title and Description */
+.page-title {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 2rem;
+    font-weight: bold;
+}
 
-    .button-group {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
+.page-description {
+    text-align: center;
+    margin: 10px auto 20px;
+    max-width: 800px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: #555;
+}
 
-    .button-group button.active {
-        background-color: #007acc;
-        color: #fff;
-    }
+/* Asset Selection */
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
 
-    .charts-container {
-        display: flex;
+.asset-description {
+    font-style: italic;
+    text-align: center;
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Time Frame Buttons */
+.time-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.time-buttons button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.time-buttons button:hover {
+    background: #007acc;
+    color: white;
+}
+
+.time-buttons button.selected {
+    background: #007acc;
+    color: white;
+    font-weight: bold;
+}
+
+/* Chart Titles */
+.chart-title {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 20px 0 10px;
+    font-weight: bold;
+}
+
+/* Chart Containers */
+.bar-chart-container,
+.line-chart-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+/* Line Chart Legend */
+.line-chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.line-chart-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.line-chart-legend .legend-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Error Messages */
+.error {
+    color: red;
+    text-align: center;
+    margin: 20px;
+}
+
+/* Hover Feature Styling */
+.hover-line {
+    stroke: #007acc;
+    stroke-width: 1.5;
+    stroke-dasharray: 4;
+}
+
+.hover-tooltip {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    pointer-events: none;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .bar-chart-container,
+    .line-chart-container {
         flex-direction: column;
-        gap: 20px;
         align-items: center;
     }
-
-    .chart {
-        width: 100%;
-        max-width: 700px;
+    .line-chart-legend {
+        flex-wrap: wrap;
     }
-</style>
+}
 
-<div class="app">
-    <h1>Asset Analysis</h1>
+<div>
+    <!-- Page Title -->
+    <h1 class="page-title">Asset Analysis</h1>
 
-    <!-- Dropdown -->
-    <div class="dropdown">
+    <!-- Page Description -->
+    <p class="page-description">
+        Discover the trends of recurring investments in various assets and how the day of investment impacts long-term growth.
+    </p>
+
+    <!-- Asset Selection -->
+    <div class="filter-container">
         <label for="asset-select">Select Asset:</label>
         <select id="asset-select" on:change={handleAssetChange}>
             {#each assets as asset}
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
+        <p class="asset-description">
+            {assetDescriptions[selectedAsset]}
+        </p>
     </div>
 
     <!-- Time Frame Buttons -->
-    <div class="button-group">
-        {#each timeFrames as timeFrame}
+    <div class="time-buttons">
+        {#each timeFrames as timeFrame (timeFrame.label)}
             <button
-                class:active={selectedTimeFrame === timeFrame}
+                class:selected={selectedTimeFrame === timeFrame}
                 on:click={() => handleTimeFrameChange(timeFrame)}
             >
                 {timeFrame.label}
@@ -276,9 +403,17 @@
         {/each}
     </div>
 
-    <!-- Charts -->
-    <div class="charts-container">
-        <div class="chart" bind:this={barChart}></div>
-        <div class="chart" bind:this={lineChart}></div>
-    </div>
+    <!-- Bar Chart Section -->
+    <h2 class="chart-title">Average Closing Prices by Day of the Week</h2>
+    <div class="bar-chart-container" bind:this={barChart}></div>
+
+    <!-- Line Chart Section -->
+    <h2 class="chart-title">Investment Growth Over Time</h2>
+    <div class="line-chart-container" bind:this={lineChart}></div>
+
+    <!-- Error Message -->
+    {#if errorMessage}
+        <p class="error">{errorMessage}</p>
+    {/if}
 </div>
+
