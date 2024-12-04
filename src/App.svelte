@@ -95,12 +95,12 @@
 
     function handleAssetChange(event) {
         selectedAsset = event.target.value;
-        calculateAverages();
+        calculateAverages(); // Recalculate averages and re-render charts on asset change
     }
 
     function handleTimeFrameChange(timeFrame) {
         selectedTimeFrame = timeFrame;
-        calculateAverages();
+        calculateAverages(); // Recalculate averages and re-render charts on time frame change
     }
 
     function drawBarChart() {
@@ -225,12 +225,8 @@
 <style>
     body {
         margin: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f9f9f9;
         font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
     }
 
     .container {
@@ -240,18 +236,38 @@
         text-align: center;
         gap: 20px;
         width: 100%;
-        max-width: 900px;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    p {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: #555;
+        max-width: 800px;
+    }
+
+    .asset-description {
+        font-style: italic;
+        color: #666;
     }
 
     .charts {
-        margin-top: 20px;
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
     }
 
     select,
     button {
-        padding: 10px 20px;
+        padding: 10px;
         border-radius: 8px;
         border: 1px solid #ccc;
+        margin: 10px;
     }
 
     button {
@@ -280,13 +296,7 @@
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
-        <p>{assetDescriptions[selectedAsset]}</p>
-    </div>
-
-    <div>
-        {#each timeFrames as frame}
-            <button on:click={() => handleTimeFrameChange(frame)}>{frame.label}</button>
-        {/each}
+        <p class="asset-description">{assetDescriptions[selectedAsset]}</p>
     </div>
 
     <div class="charts" bind:this={barChart}></div>
