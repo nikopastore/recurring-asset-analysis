@@ -221,7 +221,3 @@
         });
     }
 </script>
-
----
-
-The above preserves **your exact logic** while fixing formatting and centering content effectively. Let me know if you need the buttons styled aesthetically.
