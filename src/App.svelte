@@ -67,7 +67,7 @@
 
         investmentGrowth = daysOfWeek.map((day) => {
             let totalUnits = 0;
-            let totalValue = 0;
+            let totalValue = 10; // Start at $10
             const dailyGrowth = [];
 
             filteredData
@@ -173,7 +173,7 @@
 
         const y = d3
             .scaleLinear()
-            .domain([0, d3.max(investmentGrowth, (d) => d3.max(d.growth, (p) => p.value))])
+            .domain([10, d3.max(investmentGrowth, (d) => d3.max(d.growth, (p) => p.value))])
             .range([height, 0]);
 
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
@@ -218,27 +218,45 @@
 </script>
 
 <style>
+    .app {
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+
+    .dropdown {
+        margin: 10px 0;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .button-group button.active {
+        background-color: #007acc;
+        color: #fff;
+    }
+
     .charts-container {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
+        gap: 20px;
     }
 
     .chart {
-        flex: 1 1 48%;
-        margin: 10px;
-    }
-
-    .title {
-        text-align: center;
+        flex: 1 1 calc(50% - 10px);
+        min-width: 300px;
     }
 </style>
 
-<div>
-    <h1 class="title">Investment Analysis</h1>
+<div class="app">
+    <h1>Asset Analysis</h1>
 
-    <!-- Asset Dropdown -->
-    <div>
+    <!-- Dropdown -->
+    <div class="dropdown">
         <label for="asset-select">Select Asset:</label>
         <select id="asset-select" on:change={handleAssetChange}>
             {#each assets as asset}
@@ -248,7 +266,7 @@
     </div>
 
     <!-- Time Frame Buttons -->
-    <div>
+    <div class="button-group">
         {#each timeFrames as timeFrame}
             <button
                 class:active={selectedTimeFrame === timeFrame}
