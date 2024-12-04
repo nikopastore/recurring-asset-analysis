@@ -6,8 +6,11 @@
 
     let chart;
 
-    $: if (filteredData.length) {
-        drawChart();
+    $: {
+        console.log("Filtered Data in Chart:", filteredData);
+        if (filteredData.length) {
+            drawChart();
+        }
     }
 
     function drawChart() {
@@ -35,78 +38,56 @@
             .domain([0, d3.max(filteredData, (d) => d.Close * investmentAmount)])
             .range([height, 0]);
 
+        // Axes
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
         svg.append("g").call(d3.axisLeft(y));
 
-        // Line Chart
-        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(daysOfWeek);
+        // Line path for Monday
+        const mondayData = filteredData.filter((d) => d.Day === "Monday");
 
-        daysOfWeek.forEach((day) => {
-            const dayData = filteredData.filter((d) => d.Day === day);
-
-            const line = d3
-                .line()
-                .x((d) => x(new Date(d.Date)))
-                .y((d) => y(d.Close * investmentAmount));
-
-            svg
-                .append("path")
-                .datum(dayData)
-                .attr("fill", "none")
-                .attr("stroke", colorScale(day))
-                .attr("stroke-width", 2)
-                .attr("d", line);
+        let cumulativeInvestment = 0;
+        const cumulativeData = mondayData.map((d) => {
+            cumulativeInvestment += investmentAmount;
+            return { Date: d.Date, Value: cumulativeInvestment };
         });
 
-        // Tooltip
-        const tooltip = d3.select(chart)
-            .append("div")
-            .attr("class", "hover-tooltip")
-            .style("display", "none");
+        svg
+            .append("path")
+            .datum(cumulativeData)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 2)
+            .attr(
+                "d",
+                d3
+                    .line()
+                    .x((d) => x(new Date(d.Date)))
+                    .y((d) => y(d.Value))
+            );
 
-        svg.append("rect")
+        // Hover interaction
+        const focus = svg.append("g").style("display", "none");
+
+        focus.append("line").attr("class", "hover-line").attr("y1", 0).attr("y2", height).style("stroke", "black");
+
+        svg
+            .append("rect")
             .attr("width", width)
             .attr("height", height)
             .style("fill", "none")
             .style("pointer-events", "all")
+            .on("mouseover", () => focus.style("display", null))
             .on("mousemove", (event) => {
-                const [mouseX] = d3.pointer(event);
-                const hoveredDate = x.invert(mouseX);
+                const bisectDate = d3.bisector((d) => new Date(d.Date)).left;
+                const x0 = x.invert(d3.pointer(event)[0]);
+                const i = bisectDate(cumulativeData, x0, 1);
+                const d = cumulativeData[i - 1];
 
-                const hoveredData = filteredData.filter((d) => {
-                    const dateDiff = Math.abs(new Date(d.Date) - hoveredDate);
-                    return dateDiff < 86400000; // Filter within 1 day
-                });
-
-                tooltip
-                    .style("display", "block")
-                    .style("left", `${event.pageX + 10}px`)
-                    .style("top", `${event.pageY - 10}px`)
-                    .html(hoveredData.map((d) => `<p>${d.Day}: $${d.Close.toFixed(2)}</p>`).join(""));
+                focus.attr("transform", `translate(${x(new Date(d.Date))},0)`);
+                console.log("Hover Data:", d);
             })
-            .on("mouseout", () => tooltip.style("display", "none"));
+            .on("mouseout", () => focus.style("display", "none"));
     }
 </script>
-
-<style>
-    .hover-tooltip {
-        position: absolute;
-        background: white;
-        border: 1px solid #ccc;
-        padding: 10px;
-        border-radius: 5px;
-        pointer-events: none;
-        font-size: 0.9rem;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    div {
-        position: relative;
-        width: 100%;
-        height: 500px;
-        margin: auto;
-    }
-</style>
 
 <div bind:this={chart}></div>
