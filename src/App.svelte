@@ -224,66 +224,36 @@
 
 <style>
     body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
         background-color: #f9f9f9;
     }
 
     .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         text-align: center;
-        max-width: 800px;
-        gap: 20px;
+        width: 100%;
+        max-width: 900px;
     }
 
     .controls {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-
-    select {
-        padding: 10px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-    }
-
-    .time-buttons {
-        display: flex;
-        gap: 10px;
-    }
-
-    .time-button {
-        padding: 10px 20px;
-        font-size: 14px;
-        border-radius: 8px;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        cursor: pointer;
-    }
-
-    .time-button:hover {
-        background-color: #0056b3;
+        gap: 15px;
+        margin-bottom: 20px;
     }
 
     .charts {
-        width: 100%;
+        margin-top: 20px;
     }
 </style>
 
 <div class="container">
     <h1>Recurring Investment Analysis</h1>
-    <p>Analyze recurring investments in assets and how they perform over time.</p>
+    <p>Analyze recurring investments and their long-term impact.</p>
 
     <div class="controls">
         <select bind:value={selectedAsset} on:change={handleAssetChange}>
@@ -293,25 +263,13 @@
         </select>
         <p>{assetDescriptions[selectedAsset]}</p>
 
-        <div class="time-buttons">
+        <div>
             {#each timeFrames as frame}
-                <button
-                    class="time-button {frame === selectedTimeFrame ? 'selected' : ''}"
-                    on:click={() => handleTimeFrameChange(frame)}
-                >
-                    {frame.label}
-                </button>
+                <button on:click={() => handleTimeFrameChange(frame)}>{frame.label}</button>
             {/each}
         </div>
     </div>
 
-    <div>
-        <h2>Average Closing Prices</h2>
-        <div class="charts" bind:this={barChart}></div>
-    </div>
-
-    <div>
-        <h2>Investment Growth</h2>
-        <div class="charts" bind:this={lineChart}></div>
-    </div>
+    <div class="charts" bind:this={barChart}></div>
+    <div class="charts" bind:this={lineChart}></div>
 </div>
