@@ -266,7 +266,12 @@
 
 <div class="container">
     <h1>Recurring Investment Analysis</h1>
-    <p>Analyze how recurring investments perform over time for selected assets and days of the week.</p>
+    <p>
+        Recurring investments offer a hands-free way to grow your portfolio by automatically investing on a set schedule, eliminating the need to remember or manually manage your contributions. These visualizations are designed to help you analyze whether choosing a specific day of the week for your investments can lead to better growth over time. 
+    </p>
+    <p>
+        You can explore three assets—Bitcoin, Gold, and SPY—to discover potential patterns. The bar chart above displays the average price of your selected asset for each day of the week, helping you understand daily price trends. Below, the line chart illustrates the growth of a $10 recurring investment made on each day of the week, with each line representing a specific day. This allows you to compare the potential growth of your investments and determine the most advantageous day to invest automatically.
+    </p>
 
     <div>
         <select bind:value={selectedAsset} on:change={handleAssetChange}>
