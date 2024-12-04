@@ -235,6 +235,7 @@
         align-items: center;
         text-align: center;
         gap: 20px;
+        width: 100%;
         padding: 20px;
     }
 
@@ -248,12 +249,35 @@
         line-height: 1.5;
         color: #555;
         max-width: 800px;
-        margin: 0 auto;
     }
 
     .asset-description {
         font-style: italic;
         color: #666;
+    }
+
+    .charts {
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+    }
+
+    select,
+    button {
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin: 10px;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #0056b3;
     }
 </style>
 
@@ -265,6 +289,7 @@
     <p>
         You can explore three assets—Bitcoin, Gold, and SPY—to discover potential patterns. The bar chart above displays the average price of your selected asset for each day of the week, helping you understand daily price trends. Below, the line chart illustrates the growth of a $10 recurring investment made on each day of the week, with each line representing a specific day. This allows you to compare the potential growth of your investments and determine the most advantageous day to invest automatically.
     </p>
+
     <div>
         <select bind:value={selectedAsset}>
             {#each assets as asset}
@@ -273,4 +298,7 @@
         </select>
         <p class="asset-description">{assetDescriptions[selectedAsset]}</p>
     </div>
+
+    <div class="charts" bind:this={barChart}></div>
+    <div class="charts" bind:this={lineChart}></div>
 </div>
