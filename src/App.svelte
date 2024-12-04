@@ -101,8 +101,8 @@
         d3.select(barChart).selectAll("*").remove();
 
         const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-        const width = 500 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
+        const width = 700 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
 
         const svg = d3
             .select(barChart)
@@ -151,9 +151,9 @@
     function drawLineChart() {
         d3.select(lineChart).selectAll("*").remove();
 
-        const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-        const width = 500 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
+        const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+        const width = 700 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
 
         const svg = d3
             .select(lineChart)
@@ -196,23 +196,22 @@
                 );
         });
 
-        const legend = svg
-            .append("g")
-            .attr("transform", `translate(${width - 100},${margin.top})`);
+        const legend = svg.append("g").attr("transform", `translate(0,${height + 30})`);
 
         investmentGrowth.forEach((lineData, index) => {
             legend.append("rect")
-                .attr("x", 0)
-                .attr("y", index * 20)
+                .attr("x", index * 100)
+                .attr("y", 0)
                 .attr("width", 10)
                 .attr("height", 10)
                 .attr("fill", colors(index));
 
             legend.append("text")
-                .attr("x", 15)
-                .attr("y", index * 20 + 10)
+                .attr("x", index * 100 + 15)
+                .attr("y", 10)
                 .text(lineData.day)
-                .style("font-size", "12px");
+                .style("font-size", "12px")
+                .attr("alignment-baseline", "middle");
         });
     }
 </script>
@@ -241,14 +240,14 @@
 
     .charts-container {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        flex-direction: column;
         gap: 20px;
+        align-items: center;
     }
 
     .chart {
-        flex: 1 1 calc(50% - 10px);
-        min-width: 300px;
+        width: 100%;
+        max-width: 700px;
     }
 </style>
 
