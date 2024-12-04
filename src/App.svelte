@@ -258,6 +258,10 @@
     button:hover {
         background-color: #0056b3;
     }
+
+    .charts {
+        margin-top: 20px;
+    }
 </style>
 
 <div class="container">
@@ -270,6 +274,7 @@
                 <option value={asset}>{asset}</option>
             {/each}
         </select>
+        <p>{assetDescriptions[selectedAsset]}</p>
     </div>
 
     <div>
