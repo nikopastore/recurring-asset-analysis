@@ -14,7 +14,11 @@ export default {
     format: 'iife',
     name: 'app',
     file: 'public/build/bundle.js', // Correct path for GitHub Pages
-  },  
+    globals: {
+      d3: 'd3', // Correct D3 global variable
+    },
+  },
+  external: ['d3'], // External dependency setup
   plugins: [
     svelte({
       compilerOptions: {
