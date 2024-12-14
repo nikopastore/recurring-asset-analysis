@@ -29,7 +29,7 @@ export default {
     }),
     commonjs(),
     !production && livereload('public'),
-    production && terser(), // Correct use of terser
+    production && terser(),
   ],
   watch: {
     clearScreen: false,
