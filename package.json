@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c rollup.config.mjs",
-    "deploy": "npm run build && gh-pages -d public"
+    "deploy": "npm run build && vercel --prod"
   },
   "dependencies": {
     "svelte": "^3.0.0"
