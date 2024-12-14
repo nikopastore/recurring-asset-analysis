@@ -2,7 +2,7 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "description": "Asset Analysis App",
-  "homepage": "https://<your-github-username>.github.io/recurring-asset-analysis",
+  "homepage": "https://nikopastore.github.io/recurring-asset-analysis",
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c",
