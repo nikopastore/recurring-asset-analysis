@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Asset Analysis App",
-  "homepage": "https://nikopastore.github.io/recurring-asset-analysis",
+  "homepage": ".",
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c rollup.config.mjs",
