@@ -13,7 +13,7 @@ export default {
     sourcemap: true,
     format: 'iife',
     name: 'app',
-    file: 'public/build/bundle.js', // Output in public/build
+    file: 'public/build/bundle.js',
   },
   plugins: [
     svelte({
@@ -22,7 +22,7 @@ export default {
       },
       emitCss: true,
     }),
-    css({ output: 'bundle.css' }), // CSS output
+    css({ output: 'bundle.css' }),
     resolve({
       browser: true,
       dedupe: ['svelte'],
@@ -30,7 +30,7 @@ export default {
     commonjs(),
     !production &&
       livereload({
-        watch: 'public', // Watch the public directory
+        watch: 'public',
         port: 35731,
       }),
     production && terser(),
