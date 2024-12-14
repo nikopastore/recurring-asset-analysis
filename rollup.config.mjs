@@ -13,12 +13,8 @@ export default {
     sourcemap: true,
     format: 'iife',
     name: 'app',
-    file: 'public/build/bundle.js', // Correct path for GitHub Pages
-    globals: {
-      d3: 'd3', // Correct D3 global variable
-    },
+    file: 'public/build/bundle.js',
   },
-  external: ['d3'], // External dependency setup
   plugins: [
     svelte({
       compilerOptions: {
@@ -32,7 +28,6 @@ export default {
       dedupe: ['svelte'],
     }),
     commonjs(),
-    !production && livereload('public'),
     production && terser(),
   ],
   watch: {
