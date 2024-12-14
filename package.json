@@ -6,7 +6,7 @@
   "homepage": "https://nikopastore.github.io/recurring-asset-analysis",
   "scripts": {
     "dev": "rollup -c -w",
-    "build": "rollup -c",
+    "build": "rollup -c rollup.config.mjs",
     "deploy": "npm run build && gh-pages -d public"
   },
   "dependencies": {
