@@ -3,7 +3,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import css from 'rollup-plugin-css-only';
-import { terser } from '@rollup/plugin-terser';
+import terser from '@rollup/plugin-terser'; // Default import, no destructuring
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -29,7 +29,7 @@ export default {
     }),
     commonjs(),
     !production && livereload('public'),
-    production && terser(),
+    production && terser(), // Use terser as a default import
   ],
   watch: {
     clearScreen: false,
